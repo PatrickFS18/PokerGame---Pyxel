@@ -11,7 +11,7 @@ class Poker:
         self.baralho = Baralho()
         self.is_initialized = False
         self.verify = True
-
+        
         pyxel.init(160,120)
         pyxel.run(self.update,self.draw)
         
@@ -49,15 +49,23 @@ class Poker:
     
     def countEqualValues(self,cards):
         valores = [card.valor for card in cards]  # Criando uma lista dos valores das cartas
+        valores.sort()
         contagem = Counter(valores)  # Conta quantas vezes cada valor aparece
-        print(valores)
+        print(valores,'valores')
         resultado = {
             'Pares': {valor: count for valor, count in contagem.items() if count == 2},
             'Triplas': {valor: count for valor, count in contagem.items() if count == 3},
             'Quadruplas': {valor: count for valor, count in contagem.items() if count == 4}
         }
-
-        print(resultado)        
+        
+        for i in resultado['Pares']:
+            print(i)
+        for i in resultado['Triplas']:
+            print(i)
+        for i in resultado['Quadruplas']:
+            print(i)
+        
+        
     def verifyLogic(self, dealer, jogador):
         
         mao = []
@@ -70,6 +78,7 @@ class Poker:
         self.orderByValueAndNaipe(mao)
         self.countEqualValues(mao)
         
+        
         self.verify = False
         
     def update(self):
@@ -80,5 +89,6 @@ class Poker:
 
     def draw(self):
         pyxel.cls(1)
+        
 
 Poker()
