@@ -1,9 +1,11 @@
 class Carta:
     def __init__(self,dictCard):
-        self.valor = dictCard['value']
+        self.dictCard = dictCard
+        self.valor = dictCard['valor']
         self.naipe = dictCard['naipe']
 
-    def __str__(self):
-        return f"{self.valor} de {self.naipe}"
+    def __repr__(self):
+        return repr(self.dictCard)
+    
 
 
