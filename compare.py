@@ -28,7 +28,7 @@ class Compare:
 
     def flush(self):
         if self.common_naipe[1] == 5:
-            #paramos na implementacao dos tres tips de flushs nessa def
+            #paramos na  implementacao dos tres tips de flushs nessa def
             pass
     def high_card(self):
         pass
