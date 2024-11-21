@@ -42,7 +42,7 @@ class Poker:
         # Ordem dos naipes (Paus, Ouro, Espada, Copas)
         order_naipes = {'Paus': 0, 'Ouro': 1, 'Espada': 2, 'Copas': 3}
         
-        # Ordena a mão, primeiro pelo naipe e depois pelo valor
+        # Ordena a mão,  primeiro pelo naipe e depois pelo valor
 
         cards = cards.sort(key = lambda carta: (order_naipes[carta.naipe], carta.valor))
         return cards
