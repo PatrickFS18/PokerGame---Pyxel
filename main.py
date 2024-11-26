@@ -2,6 +2,7 @@ import pyxel
 from jogador import Jogador
 from baralho import Baralho
 from collections import Counter
+from compare import Compare
 
 class Poker:
     def __init__(self):
@@ -11,7 +12,8 @@ class Poker:
         self.baralho = Baralho()
         self.is_initialized = False
         self.verify = True
-        
+        self.compare = None
+
         pyxel.init(160,120)
         pyxel.run(self.update,self.draw)
         
@@ -64,19 +66,13 @@ class Poker:
             print(i)
         for i in resultado['Quadruplas']:
             print(i)
-        
+        print(resultado)
         
     def verifyLogic(self, dealer, jogador):
-        
-        mao = []
-        
-        for i in range(len(dealer.mao)):
-            mao.append(dealer.mao[i])
-        for i in range(len(jogador.mao)):
-            mao.append(jogador.mao[i])
-        
-        self.orderByValueAndNaipe(mao)
-        self.countEqualValues(mao)
+        self.compare = Compare(self.jogador.mao, self.dealer.mao)
+        self.compare.game()
+        #self.orderByValueAndNaipe(mao)
+        #self.countEqualValues(mao)
         
         
         self.verify = False
