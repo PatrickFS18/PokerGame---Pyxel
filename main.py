@@ -48,38 +48,19 @@ class Poker:
 
         cards = cards.sort(key = lambda carta: (order_naipes[carta.naipe], carta.valor))
         return cards
-    
-    def countEqualValues(self,cards):
-        valores = [card.valor for card in cards]  # Criando uma lista dos valores das cartas
-        valores.sort()
-        contagem = Counter(valores)  # Conta quantas vezes cada valor aparece
-        print(valores,'valores')
-        resultado = {
-            'Pares': {valor: count for valor, count in contagem.items() if count == 2},
-            'Triplas': {valor: count for valor, count in contagem.items() if count == 3},
-            'Quadruplas': {valor: count for valor, count in contagem.items() if count == 4}
-        }
-        
-        for i in resultado['Pares']:
-            print(i)
-        for i in resultado['Triplas']:
-            print(i)
-        for i in resultado['Quadruplas']:
-            print(i)
-        print(resultado)
         
     def verifyLogic(self, dealer, jogador):
         self.compare = Compare(self.jogador.mao, self.dealer.mao)
         self.compare.game()
-        self.compare.order_cards(1)
-        self.compare.order_cards(2)
         
+        #self.compare.flush()
+        self.compare.countEqualValues()
         #self.orderByValueAndNaipe(mao)
         #self.countEqualValues(mao)
         
         
         self.verify = False
-        
+
     def update(self):
         self.initializedGame()
         if(self.verify):
