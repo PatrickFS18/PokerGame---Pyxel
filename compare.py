@@ -74,20 +74,14 @@ class Compare:
         valores = [card.valor for card in cards]  # Criando uma lista dos valores das cartas
         valores.sort()
         contagem = Counter(valores)  # Conta quantas vezes cada valor aparece
-        print(valores,'valores')
+
         resultado = {
             'Pares': {valor: count for valor, count in contagem.items() if count == 2},
             'Triplas': {valor: count for valor, count in contagem.items() if count == 3},
             'Quadruplas': {valor: count for valor, count in contagem.items() if count == 4}
         }
         
-        for i in resultado['Pares']:
-            print(i)
-        for i in resultado['Triplas']:
-            print(i)
-        for i in resultado['Quadruplas']:
-            print(i)
-        print(resultado)
+        print('Count Equal Values ',resultado)
         
             #paramos na  implementacao dos tres tips de flushs nessa def
             
