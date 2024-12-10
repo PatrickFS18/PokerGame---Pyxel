@@ -71,6 +71,9 @@ class Poker:
     def verifyLogic(self, dealer, jogador):
         self.compare = Compare(self.jogador.mao, self.dealer.mao)
         self.compare.game()
+        self.compare.order_cards(1)
+        self.compare.order_cards(2)
+        
         #self.orderByValueAndNaipe(mao)
         #self.countEqualValues(mao)
         
