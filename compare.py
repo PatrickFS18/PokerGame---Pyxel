@@ -6,7 +6,7 @@ class Compare:
         self.hand = []
         self.common_naipe = None
         self.victory = [0] # Util para verificar a mao mais forte do jogador
-        self.highest_hand_value = [] # Útil para ver qual é a mão mais forte para casos de mesma vitória
+        self.highest_hand_value = [[],[],[],[],[],[],[],[],[],[]] # Útil para ver qual é a mão mais forte para casos de mesma vitória
     def game (self):
         for i in range(len(self.dealer_hand)):
             self.hand.append(self.dealer_hand[i])
@@ -58,16 +58,23 @@ class Compare:
             filtered_hand[::-1]
 
             if filtered_hand[0].valor == 14 and filtered_hand[1].valor == 13 and filtered_hand[2].valor == 12 and filtered_hand[3].valor == 11 and filtered_hand[4].valor == 10: #Royal Flush
-                self.victory.append(9) 
+                self.victory.append(9)
             elif straight: # Straight Flush
                 self.victory.append(8)
+                for i in range(1, 6):  # Deve percorrer as 5 cartas do Straight Flush
+                    self.highest_hand_value[8].append(filtered_hand[i - 1].valor)  # Adiciona o valor das cartas
+                
             else: #flush
                 self.victory.append(5)
+                for i in range(1, 6):  # Deve percorrer as 5 cartas do Straight Flush
+                    self.highest_hand_value[5].append(filtered_hand[i - 1].valor)  # Adiciona o valor das cartas
     def straight(self):
         hand = self.order_cards(1)
         straight = self.verify_straight(hand) 
         if straight: # Straight
             self.victory.append(4)
+            for i in range(1, 6):  # Deve percorrer as 5 cartas do Straight Flush
+                self.highest_hand_value[4].append(hand[i - 1].valor)  # Adiciona o valor das cartas
             
     
     def countEqualValues(self):
@@ -93,12 +100,17 @@ class Compare:
             if(quantityPairs == 1):
                 self.victory.append(1)
                 print('Um par: ',resultado['Pares'])
+                for i in range(1, 6):  # Deve percorrer as 5 cartas do Straight Flush
+                    self.highest_hand_value[1].append(resultado['Pares'])  # Adiciona o valor das cartas
             elif(quantityPairs == 2):
                 self.victory.append(2)
+                self.highest_hand_value[2].append(resultado['Pares'])  # Adiciona o valor das cartas
+                
                 print('Dois pares: ',resultado['Pares'])
 
             else:
                 self.victory.append(2)
+                
                 pares = resultado['Pares']
 
                 # Ordenar o dicionário pelas chaves de forma crescente
@@ -116,25 +128,34 @@ class Compare:
                     maior_valor = max(pares_ordenados, key=pares_ordenados.get)
                     pares_ordenados = {maior_valor: pares_ordenados[maior_valor]}             
                 print('depois de remover os pares: ',pares_ordenados)
-                
+                self.highest_hand_value[2].append(pares_ordenados)  # Adiciona o valor das cartas
+
         if len(resultado['Triplas']) > 0:
+            triplas = resultado['Triplas']
+            
             if len(resultado['Triplas']) > 1:
-                triplas = resultado['Triplas']
                 print("Antes de remover:", triplas)
                 
-                # Verificar as chaves com valor 3 (as triplas)
-                triplas_com_valor_3 = [k for k, v in triplas.items() if v == 3]
-                
+                # Verificar as chaves com valor 3 (as triplas)           
+                     
                 # Se houver exatamente duas triplas, remover a tripla com o menor valor
-                if len(triplas_com_valor_3) == 2:
-                    chave_menor = min(triplas_com_valor_3)
-                    del triplas[chave_menor]
+# Encontrar a menor chave
+                menor_chave = min(triplas)
+
+                # Remover a chave do dicionário
+                del triplas[menor_chave]
+                
             self.victory.append(3)
+            self.highest_hand_value[3].append(triplas)  # Adiciona o valor das cartas
+
             print('Triplas: ',resultado['Triplas'])
             
         if len(resultado['Quadruplas']) > 0:
             self.victory.append(7)
-            print('Quadras: ',resultado['Quadras'])
+            quadruplas = resultado['Quadruplas']
+            self.highest_hand_value[7].append(quadruplas)  # Adiciona o valor das cartas
+
+            print('Quadruplas: ',resultado['Quadruplas'])
 
             #paramos na  implementacao dos tres tips de flushs nessa def
             

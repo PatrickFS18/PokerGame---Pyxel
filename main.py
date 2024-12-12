@@ -12,8 +12,8 @@ class Poker:
         self.baralho = Baralho()
         self.is_initialized = False
         self.verify = True
-        self.compare = None
-
+        self.compare_1_1 = None
+        self.compare_1_2 = None
         pyxel.init(160,120)
         pyxel.run(self.update,self.draw)
         
@@ -50,12 +50,35 @@ class Poker:
         return cards
         
     def verifyLogic(self, dealer, jogador):
-        self.compare = Compare(self.jogador.mao, self.dealer.mao)
-        self.compare.game()
+        print('JOGADOR 1!!!')
+        self.compare_1 = Compare(self.jogador.mao, self.dealer.mao)
+        self.compare_1.game()
+        self.compare_1.countEqualValues()
+        print('victory',self.compare_1.victory)
         
-        #self.compare.flush()
-        self.compare.countEqualValues()
-        print('victory',self.compare.victory)
+        print('JOGADOR 2!!!')
+        
+        self.compare_2 = Compare(self.adversario.mao, self.dealer.mao)
+        self.compare_2.game()
+        self.compare_2.countEqualValues()
+        
+        print('victory',self.compare_2.victory)
+        print('as maos do cara 1: ',self.compare_1.highest_hand_value)
+
+        player_1_victory = max(self.compare_1.victory)
+        player_2_victory = max(self.compare_2.victory)
+        
+        print('Valor vitoria jogador 1: ',player_1_victory)
+        print('Valor vitoria jogador 2: ',player_2_victory)
+        print('as maos do cara 2: ',self.compare_2.highest_hand_value)
+
+        if(player_1_victory == player_2_victory):
+            print('Possível empate. verificar qual carta maior')
+            pass
+        elif(player_1_victory > player_2_victory):
+            print('player 1 venceu. ')
+        else:
+            print('player 2 venceu')
         #self.orderByValueAndNaipe(mao)
         #self.countEqualValues(mao)
         
