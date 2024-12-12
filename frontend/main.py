@@ -19,7 +19,8 @@ class Poker:
         self.is_initialized = False
         self.verify = True
         self.compare = None
-
+        self.sala_selecionada_index = 0 
+        
         pyxel.init(160,120)
         pyxel.run(self.update,self.draw)
         
@@ -69,33 +70,39 @@ class Poker:
         self.verify = False
 
     def update(self):
-        # Criar sala
-        if pyxel.btnp(pyxel.KEY_C):
+        if pyxel.btnp(pyxel.KEY_C):  # Criar sala
             self.cliente_socket.criar_sala()
 
-        # Ingressar na sala
-        if pyxel.btnp(pyxel.KEY_I) and self.cliente_socket.sala_selecionada is not None:
-            if self.cliente_socket.sala_selecionada in self.cliente_socket.salas_disponiveis:
-                sala = self.cliente_socket.salas_disponiveis[self.cliente_socket.sala_selecionada]
-                if len(sala) < 2:  # Verifica se a sala tem espaço
-                    self.cliente_socket.ingressar_sala(self.cliente_socket.sala_selecionada)
-                    self.jogador.sala_selecionada = self.cliente_socket.sala_selecionada
-                    print('testando o jogador: ', self.jogador.sala_selecionada)
-                else:
-                    print("A sala está cheia!")
-            else:
-                print("Sala selecionada não existe!")
+        if pyxel.btnp(pyxel.KEY_I) and self.cliente_socket.sala_selecionada is not None:  # Ingressar na sala
+            self.cliente_socket.ingressar_sala(self.cliente_socket.sala_selecionada)
+            self.jogador.sala_selecionada = self.cliente_socket.sala_selecionada
+            print('Jogador entrou na sala:', self.jogador.sala_selecionada)
 
+        # Navegação pelas salas disponíveis (usando as teclas de seta)
+        if pyxel.btnp(pyxel.KEY_DOWN):  # Descer para a próxima sala
+            self.sala_selecionada_index = (self.sala_selecionada_index + 1) % len(self.cliente_socket.salas_disponiveis)
+        
+        if pyxel.btnp(pyxel.KEY_UP):  # Subir para a sala anterior
+            self.sala_selecionada_index = (self.sala_selecionada_index - 1) % len(self.cliente_socket.salas_disponiveis)
+    
     def draw(self):
         pyxel.cls(0)
         pyxel.text(10, 10, "Salas disponíveis:", pyxel.COLOR_WHITE)
 
         # Exibindo as salas e jogadores
         y_offset = 20
-        for sala_id, jogadores in self.cliente_socket.salas_disponiveis.items():
-            jogadores_str = ', '.join(jogadores)
-            pyxel.text(10, y_offset, f"Sala {sala_id}: {jogadores_str}", pyxel.COLOR_WHITE)
+        salas_list = list(self.cliente_socket.salas_disponiveis.items())  # Convertendo o dicionário para lista
+        for index, (sala_id, jogadores) in enumerate(salas_list):
+            # Exibe apenas o número da sala e o número dos jogadores
+            jogadores_str = ', '.join([f"Player {i+1}" for i in range(len(jogadores))])
+            color = pyxel.COLOR_WHITE if index != self.sala_selecionada_index else pyxel.COLOR_YELLOW
+            pyxel.text(10, y_offset, f"Sala {sala_id}: {jogadores_str}", color)
             y_offset += 10
+
+        # Atualizar o botão de ingresso na sala
+        if pyxel.btnp(pyxel.KEY_I) and self.cliente_socket.sala_selecionada is not None:
+            self.cliente_socket.sala_selecionada = salas_list[self.sala_selecionada_index][0]
+            print(f"Sala {self.cliente_socket.sala_selecionada} selecionada para ingresso.")
 
         # Exibir o botão de criação de sala
         pyxel.text(10, 110, "Pressione 'C' para criar uma sala", pyxel.COLOR_GREEN)
