@@ -100,8 +100,7 @@ class Compare:
             if(quantityPairs == 1):
                 self.victory.append(1)
                 print('Um par: ',resultado['Pares'])
-                for i in range(1, 6):  # Deve percorrer as 5 cartas do Straight Flush
-                    self.highest_hand_value[1].append(resultado['Pares'])  # Adiciona o valor das cartas
+                self.highest_hand_value[1].append(resultado['Pares'])  # Adiciona o valor das cartas
             elif(quantityPairs == 2):
                 self.victory.append(2)
                 self.highest_hand_value[2].append(resultado['Pares'])  # Adiciona o valor das cartas
@@ -135,11 +134,8 @@ class Compare:
             
             if len(resultado['Triplas']) > 1:
                 print("Antes de remover:", triplas)
-                
-                # Verificar as chaves com valor 3 (as triplas)           
-                     
-                # Se houver exatamente duas triplas, remover a tripla com o menor valor
-# Encontrar a menor chave
+
+                # Encontrar a menor chave
                 menor_chave = min(triplas)
 
                 # Remover a chave do dicionário
