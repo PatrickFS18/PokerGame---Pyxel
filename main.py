@@ -55,6 +55,7 @@ class Poker:
         
         #self.compare.flush()
         self.compare.countEqualValues()
+        print('victory',self.compare.victory)
         #self.orderByValueAndNaipe(mao)
         #self.countEqualValues(mao)
         

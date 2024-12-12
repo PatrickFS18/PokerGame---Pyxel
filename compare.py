@@ -27,15 +27,16 @@ class Compare:
         if case == 2:
             self.hand.sort(key = lambda carta: (order_naipes[carta.naipe], carta.valor))
             #self.hand = [{'valor': 7, 'naipe': 'Paus'}, {'valor': 9, 'naipe': 'Paus'}, {'valor': 10, 'naipe': 'Ouro'}, {'valor': 11, 'naipe': 'Ouro'}, {'valor': 12, 'naipe': 'Ouro'}, {'valor': 13, 'naipe': 'Ouro'}, {'valor': 14, 'naipe': 'Ouro'}]
-            print(self.hand)
+            #print(self.hand)
             carta_naipe = [carta.naipe for carta in self.hand]
             contador =  Counter(carta_naipe)
             self.common_naipe = contador.most_common(1)[0]
            
     def verify_straight(self,hand):
-        sequencia = 1 
-        for i in range(1, len(cartas_ordenadas)):
-            if cartas_ordenadas.valor[i] == cartas_ordenadas.valor[i - 1] + 1:
+        sequencia = 1
+        #print(hand)
+        for i in range(1, len(hand)):
+            if hand.valor[i] == hand.valor[i - 1] + 1:
                 sequencia += 1
                 if sequencia == 5:
                     return True  # Straight flush
@@ -43,7 +44,7 @@ class Compare:
                 sequencia = 1 
         
         # Verificar caso especial do Ás baixo (A-2-3-4-5)
-        if set([14, 2, 3, 4, 5]).issubset(set(cartas_ordenadas.valor)):
+        if set([14, 2, 3, 4, 5]).issubset(set(hand.valor)):
             return True
         return False 
 
@@ -81,9 +82,59 @@ class Compare:
             'Quadruplas': {valor: count for valor, count in contagem.items() if count == 4}
         }
         
-        print('Count Equal Values ',resultado)
-        
+        #print('Count Equal Values ',resultado)
+        if (len(resultado['Pares']) > 0):
+            quantityPairs = len(resultado['Pares'])
+            
+            # 3 casos: se tiver 1 par: victory = 1
+            # se tiver 2 pares victory = 2
+            # se tiver +2 pares, verificar qual a dupla de pares maior e victory = 2
+            print('quantity pairs: ',quantityPairs)
+            if(quantityPairs == 1):
+                self.victory.append(1)
+                print('Um par: ',resultado['Pares'])
+            elif(quantityPairs == 2):
+                self.victory.append(2)
+                print('Dois pares: ',resultado['Pares'])
+
+            else:
+                self.victory.append(2)
+                pares = resultado['Pares']
+
+                # Ordenar o dicionário pelas chaves de forma crescente
+                pares_ordenados = dict(sorted(pares.items()))
+
+                # Remover o número (chave) de menor valor
+                menor_chave = min(pares_ordenados)
+                print('antes de remover os pares: ',pares)
+                del pares_ordenados[menor_chave]
+
+
+                # Verificar se o valor da chave de maior valor é 2, pois é o caso de seus 2 pares serem com a maior carta
+                if max(pares_ordenados.values()) == 2:
+                    # Se for 2, manter apenas a chave com o maior valor
+                    maior_valor = max(pares_ordenados, key=pares_ordenados.get)
+                    pares_ordenados = {maior_valor: pares_ordenados[maior_valor]}             
+                print('depois de remover os pares: ',pares_ordenados)
+                
+        if len(resultado['Triplas']) > 0:
+            if len(resultado['Triplas']) > 1:
+                triplas = resultado['Triplas']
+                print("Antes de remover:", triplas)
+                
+                # Verificar as chaves com valor 3 (as triplas)
+                triplas_com_valor_3 = [k for k, v in triplas.items() if v == 3]
+                
+                # Se houver exatamente duas triplas, remover a tripla com o menor valor
+                if len(triplas_com_valor_3) == 2:
+                    chave_menor = min(triplas_com_valor_3)
+                    del triplas[chave_menor]
+            self.victory.append(3)
+            print('Triplas: ',resultado['Triplas'])
+            
+        if len(resultado['Quadruplas']) > 0:
+            self.victory.append(7)
+            print('Quadras: ',resultado['Quadras'])
+
             #paramos na  implementacao dos tres tips de flushs nessa def
             
-    def high_card(self):
-        pass
