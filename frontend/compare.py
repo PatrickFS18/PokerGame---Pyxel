@@ -34,8 +34,8 @@ class Compare:
            
     def verify_straight(self,hand):
         sequencia = 1 
-        for i in range(1, len(cartas_ordenadas)):
-            if cartas_ordenadas.valor[i] == cartas_ordenadas.valor[i - 1] + 1:
+        for i in range(1, len(hand)):
+            if hand.valor[i] == hand.valor[i - 1] + 1:
                 sequencia += 1
                 if sequencia == 5:
                     return True  # Straight flush
@@ -43,7 +43,7 @@ class Compare:
                 sequencia = 1 
         
         # Verificar caso especial do Ás baixo (A-2-3-4-5)
-        if set([14, 2, 3, 4, 5]).issubset(set(cartas_ordenadas.valor)):
+        if set([14, 2, 3, 4, 5]).issubset(set(hand.valor)):
             return True
         return False 
 
@@ -63,8 +63,8 @@ class Compare:
             else: #flush
                 self.victory.append(5)
     def straight(self):
-        hand = self.order_cards(1)
-        straight = self.verify_straight(hand) 
+        self.order_cards(1)
+        straight = self.verify_straight(self.hand) 
         if straight: # Straight
             self.victory.append(4)
             

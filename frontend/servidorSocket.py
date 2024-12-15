@@ -72,6 +72,7 @@ class ServidorSocket:
                 
                 # Marca que o jogador está na sala
                 self.salas_disponiveis[sala_id].append(self.id_player)
+                
                 print(f'O jogador {self.id_player} entrou na sala {sala_id}')
             else:
                 print(f'O jogador {self.id_player} já está na sala {sala_id} ou a sala está cheia, ou não existe.')
