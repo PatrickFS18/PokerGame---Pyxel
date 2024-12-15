@@ -92,20 +92,37 @@ class Poker:
             print(salas_list)
             
     def draw(self):
+       
         pyxel.cls(0)
-        pyxel.text(10, 10, "Salas disponíveis:", pyxel.COLOR_WHITE)
+        if self.cliente_socket.sala_selecionada is None:
+            pyxel.text(10, 10, "Salas disponíveis:", pyxel.COLOR_WHITE)
 
-        # Exibindo as salas disponíveis
-        y_offset = 20
-        salas_list = list(self.cliente_socket.salas_disponiveis.items())
-        for index, (sala_id, jogadores) in enumerate(salas_list):
-            jogadores_str = ', '.join([f"Player {j}" for j in jogadores])
-            color = pyxel.COLOR_YELLOW if index == self.sala_selecionada_index else pyxel.COLOR_WHITE
-            pyxel.text(10, y_offset, f"Sala {sala_id}: {jogadores_str}", color)
-            y_offset += 10
+            # Exibindo as salas disponíveis
+            y_offset = 20
+            salas_list = list(self.cliente_socket.salas_disponiveis.items())
+            for index, (sala_id, jogadores) in enumerate(salas_list):
+                jogadores_str = ', '.join([f"Player {j}" for j in jogadores])
+                color = pyxel.COLOR_YELLOW if index == self.sala_selecionada_index else pyxel.COLOR_WHITE
+                pyxel.text(10, y_offset, f"Sala {sala_id}: {jogadores_str}", color)
+                y_offset += 10
 
-        # Mostrar controles
-        pyxel.text(10, 110, "Pressione 'C' para criar uma sala", pyxel.COLOR_GREEN)
-        pyxel.text(10, 120, "Setas: navegar | ENTER: ingressar", pyxel.COLOR_GREEN)
+            # Mostrar controles
+            pyxel.text(10, 110, "Pressione 'C' para criar uma sala", pyxel.COLOR_GREEN)
+            pyxel.text(10, 120, "Setas: navegar | ENTER: ingressar", pyxel.COLOR_GREEN)
+        else:
+            salas_list = list(self.cliente_socket.salas_disponiveis.items())
+            y_offset = 20
+                
+            for index, (sala_id, jogadores) in enumerate(salas_list):
+                jogadores_str = ', '.join([f"Player {j}" for j in jogadores])
+                color = pyxel.COLOR_YELLOW if index == self.sala_selecionada_index else pyxel.COLOR_WHITE
+                pyxel.text(10, y_offset, f"{jogadores_str}", color)
+                y_offset += 10
+            if(len(jogadores) < 2 ):
+                pyxel.text(10, 10,f"Aguardando Jogadores para a sala: {self.cliente_socket.sala_selecionada} ", pyxel.COLOR_RED)
+            else:
+                
+                pyxel.text(10, 10,f"A partida ja vai iniciar!!", pyxel.COLOR_GREEN)
 
+                
 Poker()
