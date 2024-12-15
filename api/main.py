@@ -6,62 +6,97 @@ sio = socketio.Server(cors_allowed_origins=["http://localhost:3000", "http://loc
 # Dicionário para armazenar as salas e os jogadores
 salas = {}
 
-MAX_JOGADORES = 2  # Definindo o limite de jogadores por sala
+MAX_JOGADORES = 2  # Limite de jogadores por sala
+player_id_counter = 1
+player_ids = {}
 
 @sio.event
 def connect(sid, environ, auth):
-    print(f"Jogador {sid} conectado!")
+    global player_id_counter
+
+    # Atribui o próximo ID disponível ao jogador
+    player_ids[sid] = player_id_counter
+    print('idddddddd ',player_ids)
+    player_id_counter += 1
+
+    print(f"Jogador conectado: SID padrão {sid}, ID personalizado {player_ids[sid]}")
+
+    # Envia o ID personalizado para o cliente
+    sio.emit('sid', {'sid': sid, 'player_id': player_ids[sid]}, room=sid)
 
 @sio.event
 def criar_sala(sid):
     # Verifica se o jogador já está em alguma sala
+    if player_ids.get(sid) is None:
+        sio.emit('erro_criacao_sala', {'mensagem': 'Jogador não conectado corretamente!'}, room=sid)
+        return
+
     for jogadores in salas.values():
-        if sid in jogadores:
+        if player_ids[sid] in jogadores:  # Verifica se o ID do jogador já está em alguma sala
             sio.emit('erro_criacao_sala', {'mensagem': 'Você já está em uma sala!'}, room=sid)
-            return  # Não permite criar nova sala se o jogador já estiver em uma
+            return
 
-    # Cria uma sala se possível
-    sala_id = len(salas) + 1  # Gerar um novo ID de sala
-    salas[sala_id] = [sid]  # Adiciona o jogador à sala
-    sio.enter_room(sid, str(sala_id))  # O jogador entra na sala
+    # Cria uma nova sala
+    sala_id = str(len(salas) + 1)  # Garantir que o ID da sala seja string
+    salas[sala_id] = [player_ids[sid]]  # Adiciona o jogador à sala
 
-    # Emitir a atualização para todos os clientes sobre as salas e jogadores
+    sio.enter_room(sid, sala_id)
+
     listar_salas(sid)
 
     sio.emit('sala_criada', {'sala_id': sala_id, 'status': 'criada'}, room=sid)
-
 @sio.event
 def ingressar_sala(sid, sala_id):
-    if sala_id in salas and len(salas[sala_id]) < MAX_JOGADORES:
-        salas[sala_id].append(sid)  # Adiciona o jogador à sala
-        sio.enter_room(sid, str(sala_id))  # O jogador entra na sala
+    sala_id = str(sala_id)  # Garantir consistência no tipo
+    if sala_id in salas:
+        if len(salas[sala_id]) < MAX_JOGADORES:
+            salas[sala_id].append(player_ids[sid])  # Adiciona o jogador pela ID personalizada
+            sio.enter_room(sid, sala_id)
 
-        # Emitir a atualização para todos os clientes sobre as salas e jogadores
-        listar_salas(sid)
+            listar_salas(sid)
 
-        sio.emit('sala_ingressada', {'sala_id': sala_id, 'status': 'ingressado'}, room=sid)
+            sio.emit('sala_ingressada', {'sala_id': sala_id, 'status': 'ingressado'}, room=sid)
+        else:
+            sio.emit('erro_sala', {'mensagem': 'Sala cheia!'}, room=sid)
     else:
-        sio.emit('erro_sala', {'mensagem': 'Sala cheia ou inexistente'}, room=sid)
+        sio.emit('erro_sala', {'mensagem': 'Sala inexistente!'}, room=sid)
 
 @sio.event
 def listar_salas(sid):
-    # Emite as salas e os jogadores para todos os clientes
     salas_info = {}
+    print("Listando salas...")
+
     for sala_id, jogadores in salas.items():
-        salas_info[sala_id] = jogadores
-    sio.emit('salas_disponiveis', salas_info)  # Envia as informações das salas para todos os clientes
-    
+        salas_info[sala_id] = []
+        print(f"Sala {sala_id} tem os jogadores: {jogadores}")
+
+        for jogador in jogadores:
+            # Verifica se o jogador (SID) está no dicionário player_ids
+            if jogador in player_ids.values():
+                print(f"Jogador {jogador} encontrado, ID: {jogador}")
+                salas_info[sala_id].append(jogador)  # Adiciona o ID personalizado
+            else:
+                print(f"Erro: player_id para SID {jogador} não encontrado em player_ids")
+                salas_info[sala_id].append("Desconhecido")  # Ou outro valor para indicar erro
+
+    print(f"Salas disponíveis: {salas_info}")
+    sio.emit('salas_disponiveis', salas_info, room=sid or None)
+
+
 @sio.event
 def disconnect(sid):
-    # Quando um jogador desconectar, removemos ele das salas
-    for sala_id, jogadores in salas.items():
-        if sid in jogadores:
-            jogadores.remove(sid)
-            if len(jogadores) == 0:  # Se a sala estiver vazia, podemos removê-la
+    # Remove o jogador das salas e do mapeamento
+    for sala_id, jogadores in list(salas.items()):
+        if player_ids[sid] in jogadores:  # Verifica o ID do jogador
+            jogadores.remove(player_ids[sid])  # Remove o jogador pela ID personalizada
+            if not jogadores:
                 del salas[sala_id]
             break
 
-    # Emitir a atualização para todos os clientes sobre as salas e jogadores
+    # Remove o jogador de player_ids
+    if sid in player_ids:
+        del player_ids[sid]
+
     listar_salas(sid)
 
 # Inicia o servidor WSGI
