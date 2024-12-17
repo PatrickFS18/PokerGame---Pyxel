@@ -48,17 +48,9 @@ class Poker:
 
         cards = cards.sort(key = lambda carta: (order_naipes[carta.naipe], carta.valor))
         return cards
-    
-    def maior_valor_cartas(mao):
-                    maior_valor = -1  # Inicializa com um valor pequeno
-                    for jogada in mao:
-                        for dicionario in jogada:
-                            for carta in dicionario.keys():
-                                if carta > maior_valor:
-                                    maior_valor = carta
-                    return maior_valor
                     
-                    
+                
+                
     def verifyLogic(self, dealer, jogador):
         print('JOGADOR 1!!!')
         self.compare_1 = Compare(self.jogador.mao, self.dealer.mao)
@@ -94,8 +86,8 @@ class Poker:
             mao_jogador_1 = self.compare_1.highest_hand_value
             mao_jogador_2 = self.compare_2.highest_hand_value
             # Verificação de empate
-            maior_carta_1 = self.maior_valor_cartas(mao_jogador_1)
-            maior_carta_2 = self.maior_valor_cartas(mao_jogador_2)
+            maior_carta_1 = self.compare_1.maior_valor_cartas(mao_jogador_1)
+            maior_carta_2 = self.compare_2.maior_valor_cartas(mao_jogador_2)
             print(maior_carta_1)
             print(maior_carta_2)
             # Função para encontrar o maior valor de carta em uma mão

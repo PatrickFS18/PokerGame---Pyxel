@@ -16,6 +16,17 @@ class Compare:
         print('player',self.hand)
         # print('dealer ',self.dealer_hand)
         # print('mao ',self.hand)
+        
+    
+    def maior_valor_cartas(self,hand):
+                    maior_valor = -1  # Inicializa com um valor pequeno
+                    for jogada in hand:
+                        for dicionario in jogada:
+                            for carta in dicionario.keys():
+                                if carta > maior_valor:
+                                    maior_valor = carta
+                    return maior_valor
+                
     def order_cards (self, case):
         # Ordem dos naipes (Paus, Ouro, Espada, Copas)
         order_naipes = {'Paus': 0, 'Ouro': 1, 'Espada': 2, 'Copas': 3}
