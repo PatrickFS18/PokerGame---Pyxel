@@ -81,12 +81,12 @@ class Compare:
                 for i in range(1, 6):  # Deve percorrer as 5 cartas do Straight Flush
                     self.highest_hand_value[5].append(filtered_hand[i - 1].valor)  # Adiciona o valor das cartas
     def straight(self):
-        self.order_cards(1)
-        straight = self.verify_straight(self.hand) 
+        hand = self.order_cards(1)
+        straight = self.verify_straight(hand) 
         if straight: # Straight
             self.victory.append(4)
             for i in range(1, 6):  # Deve percorrer as 5 cartas do Straight Flush
-                self.highest_hand_value[4].append(self.hand[i - 1].valor)  # Adiciona o valor das cartas
+                self.highest_hand_value[4].append(hand[i - 1].valor)  # Adiciona o valor das cartas
             
     def high_cards(self):
         # Adicionar carta mais alta
