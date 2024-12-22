@@ -54,7 +54,7 @@ def criar_sala(sid):
 
     sio.emit('sala_criada', {'sala_id': sala_id, 'status': 'criada'}, room=sid)
     
-    
+
 @sio.event
 # Lógica de ingressar na sala, e iniciar partida caso atinga o máximo de jogadores
 def ingressar_sala(sid, sala_id):
@@ -87,7 +87,10 @@ def ingressar_sala(sid, sala_id):
     else:
         sio.emit('erro_sala', {'mensagem': 'Sala inexistente!'}, room=sid)
 
-
+@sio.event
+def rodadas(sala_id):
+    
+    pass
 
 @sio.event
 def listar_salas(sid):
