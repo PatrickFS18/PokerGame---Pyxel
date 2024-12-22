@@ -6,7 +6,7 @@ class Baralho:
         self.cartas = []
 
     def gerarCartas(self):
-        for i in range(1, 14):  # 1 a 13 (de Ás a Rei)
+        for i in range(2, 15):  # 2 a 14 (de 2 a Rei, e Ás como 14)
             if len(self.cartas) < 53:
                 self.cartas.append(Carta({'valor':i, 'naipe': 'Paus'}))
                 self.cartas.append(Carta({'valor':i, 'naipe': 'Ouro'}))
