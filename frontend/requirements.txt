@@ -1,3 +1,0 @@
-pyxel
-python-socketio
-eventlet

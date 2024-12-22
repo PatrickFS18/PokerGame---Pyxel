@@ -1,9 +1,9 @@
 import pyxel
 
-from jogador import Jogador
-from baralho import Baralho
+from api.utils.jogador import Jogador
+from api.utils.baralho import Baralho
 from collections import Counter
-from compare import Compare
+from api.utils.compare import Compare
 from servidorSocket import ServidorSocket
 # Conectando ao servidor
 
@@ -29,22 +29,24 @@ class Poker:
         if(self.is_initialized == False):
             # Instância de Initialização dos jogadores e Mesa e embaralhamento de cartas
             
-            self.baralho.gerarCartas()
-            self.baralho.embaralharCartas()
-            cartas = self.baralho.cartas
+            # self.baralho.gerarCartas()
+            # self.baralho.embaralharCartas()
+            # cartas = self.baralho.cartas
             
-            # Distribuição de cartas 
-            for i in range (0,4,2):
-                self.jogador.mao.append(cartas[i])
-                cartas.pop(0)
+            # # Distribuição de cartas 
+            # for i in range (0,4,2):
+            #     self.jogador.mao.append(cartas[i])
+            #     cartas.pop(0)
                 
-            for i in range(0,2):
-                self.adversario.mao.append(cartas[i])
-                cartas.pop(0)
+            # for i in range(0,2):
+            #     self.adversario.mao.append(cartas[i])
+            #     cartas.pop(0)
                 
-            for i in range (0,5):
-                self.dealer.mao.append(cartas[i])
-                cartas.pop(0)
+            # for i in range (0,5):
+            #     self.dealer.mao.append(cartas[i])
+            #     cartas.pop(0)
+            
+            # CHAMAR FUNÇÃO DO BACKEND PARA PEGAR ESSA INFORMAÇÃO
             self.is_initialized = True
     
     def orderByValueAndNaipe(self,cards):

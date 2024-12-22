@@ -1,0 +1,6 @@
+pyxel
+python-socketio
+eventlet
+requests
+websocket-client
+
