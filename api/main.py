@@ -21,7 +21,14 @@ def connect(sid, environ, auth):
     # Atribui o próximo ID disponível ao jogador
     player_ids[sid] = player_id_counter
     print('idddddddd ',player_ids)
-    
+    salas_info = []
+    for sala_id, sala_info in salas.items():  # Desempacotando chave (ID) e valor (informações da sala)
+        salas_info.append({
+            "sala_id": sala_id,  # Adicione o ID da sala para facilitar no cliente
+            "jogadores": sala_info["jogadores"],
+            "rodada": sala_info["rodada"],
+        })
+    sio.emit('salas_disponiveis', {'salas': salas_info})  # Atualiza todos os clientes
     # Inicia o jogo
      
     player_id_counter += 1
@@ -67,20 +74,28 @@ def criar_sala(sid):
 def ingressar_sala(sid, sala_id):
     sala_id = str(sala_id)  # Garantir consistência no tipo
     if sala_id in salas:
-        print(len(salas[sala_id]))
         print(salas[sala_id])
-        if len(salas[sala_id]) < MAX_JOGADORES:
-            salas[sala_id].append(player_ids[sid])  # Adiciona o jogador pela ID personalizada
+        if len(salas[sala_id]["jogadores"]) < MAX_JOGADORES:
+            salas[sala_id]["jogadores"].append(player_ids[sid])  # Adiciona o jogador pela ID personalizada
             sio.enter_room(sid, sala_id)
             
     
+            salas_info = []
+            for sala_id, sala_info in salas.items():  # Desempacotando chave (ID) e valor (informações da sala)
+                salas_info.append({
+                    "sala_id": sala_id,  # Adicione o ID da sala para facilitar no cliente
+                    "jogadores": sala_info["jogadores"],
+                    "rodada": sala_info["rodada"],
+                })
+            sio.emit('salas_disponiveis', {'salas': salas_info})  # Atualiza todos os clientes
 
             sio.emit('sala_ingressada', {'sala_id': sala_id, 'status': 'ingressado'}, room=sid)
             
-            if(len(salas[sala_id]) == MAX_JOGADORES):
+            if(len(salas[sala_id]["jogadores"]) == MAX_JOGADORES):
                 # A partida deve começar, e iniciar a distribuição de cartas
                 instanciar_cartas = InitGame()
-                
+                sio.emit('salas_disponiveis', {'salas': salas_info})  # Atualiza todos os clientes
+
                 # Gerar o baralho para esta sala
                 instanciar_cartas.init_game(sala_id)
                 
@@ -88,7 +103,7 @@ def ingressar_sala(sid, sala_id):
                  
                 cartas = instanciar_cartas.get_baralho(sala_id)
                 if (cartas is not None):
-                    jogadores,dealer = instanciar_cartas.distribuir_cartas(salas[sala_id],cartas)
+                    jogadores,dealer = instanciar_cartas.distribuir_cartas(salas[sala_id]["jogadores"],cartas)
                 
                     sio.emit('init_game', {'mensagem': 'A partida vai começar!','jogadores':jogadores,'dealer':dealer}, room=sid) # Retorna a lista de jogadores (instanciados na classe Jogador. Acessar jogador.mao)
         else:
@@ -127,7 +142,7 @@ def rodadas(sid,sala_id):
         sio.emit('erro', {'mensagem': 'Sala inexistente!'}, room=sid)
         
 @sio.event
-def salas_disponiveis(data):  # Adicione 'data' como parâmetro
+def salas_disponiveis():  # Adicione 'data' como parâmetro
     salas_info = []
     for sala_id, sala_info in salas.items():  # Desempacotando chave (ID) e valor (informações da sala)
         salas_info.append({
@@ -152,6 +167,15 @@ def disconnect(sid):
     # Remove o jogador de player_ids
     if sid in player_ids:
         del player_ids[sid]
+    
+    salas_info = []
+    for sala_id, sala_info in salas.items():  # Desempacotando chave (ID) e valor (informações da sala)
+        salas_info.append({
+            "sala_id": sala_id,  # Adicione o ID da sala para facilitar no cliente
+            "jogadores": sala_info["jogadores"],
+            "rodada": sala_info["rodada"],
+        })
+    sio.emit('salas_disponiveis', {'salas': salas_info})  # Atualiza todos os clientes
 
 
 # Inicia o servidor WSGI

@@ -70,16 +70,36 @@ class ServidorSocket:
         print('ingressando na sala linha 59')
         if self.id_player is not None:
             print('ingressando na sala linha 61')
-
+            print('a sala: ',self.salas_disponiveis)
+            jogador_em_sala = False
+            quant_jogadores = 0
+            sala_encontrada = False
+            sala_definida = None
+            c = -1
+            for sala in self.salas_disponiveis:
+                c = c + 1
+                if(sala["sala_id"] == sala_id):
+                    sala_encontrada = True
+                    sala_definida = c
+                    print(sala["jogadores"])
+                    quant_jogadores = len(sala["jogadores"])
+                    
+                if (self.id_player in sala["jogadores"]):
+                    jogador_em_sala = True
+            
+            print('id ta ali ', (sala_id in self.salas_disponiveis))
+            print('quantidade de jogadores: ',quant_jogadores)
+            print('self.sid: ',self.sid)
+            print('jogador ta em uma sala? ',jogador_em_sala)
+            print('Sala encontrada ', sala_encontrada)
             # Verifica se a sala está disponível e o jogador não está nela
-            if (sala_id in self.salas_disponiveis) and (len(self.salas_disponiveis[sala_id]) < 2) and (self.sid is not None) and (self.id_player not in self.salas_disponiveis[sala_id]):
+            if (sala_encontrada == True) and (quant_jogadores < 2) and (self.sid is not None) and (jogador_em_sala == False):
                 print(f'Executando função para entrar na sala {sala_id}')
-                print(f'Salas disponíveis: {self.salas_disponiveis[sala_id]}')
                 # Emite o evento para o servidor ingressar na sala
                 self.sio.emit('ingressar_sala',sala_id)
                 
                 # Marca que o jogador está na sala
-                self.salas_disponiveis[sala_id].append(self.id_player)
+                self.salas_disponiveis[sala_definida]["jogadores"].append(self.id_player)
                 
                 print(f'O jogador {self.id_player} entrou na sala {sala_id}')
             else:
