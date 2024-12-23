@@ -1,4 +1,4 @@
-from compare import Compare
+from utils.compare import Compare
 
 class Victory:
     def __init__(self):

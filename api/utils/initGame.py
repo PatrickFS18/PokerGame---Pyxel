@@ -1,5 +1,5 @@
-from jogador import Jogador
-from baralho import Baralho
+from utils.jogador import Jogador
+from utils.baralho import Baralho
 
 class InitGame:
     def __init__(self):

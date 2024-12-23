@@ -1,6 +1,7 @@
 import socketio
 
-from api.utils.initGame import InitGame
+from utils.victory import Victory
+from utils.initGame import InitGame
 # Inicializando o servidor SocketIO
 sio = socketio.Server(cors_allowed_origins=["http://localhost:3000", "http://localhost:4000", "*"])
 
@@ -30,41 +31,49 @@ def connect(sid, environ, auth):
     # Envia o ID personalizado para o cliente
     sio.emit('sid', {'sid': sid, 'player_id': player_ids[sid]}, room=sid)
 
-
-
 @sio.event
 def criar_sala(sid):
-    # Verifica se o jogador já está em alguma sala
     if player_ids.get(sid) is None:
         sio.emit('erro_criacao_sala', {'mensagem': 'Jogador não conectado corretamente!'}, room=sid)
         return
 
-    for jogadores in salas.values():
-        if player_ids[sid] in jogadores:  # Verifica se o ID do jogador já está em alguma sala
+    # Verifica se o jogador já está em uma sala
+    for sala in salas.values():
+        if player_ids[sid] in sala["jogadores"]:
             sio.emit('erro_criacao_sala', {'mensagem': 'Você já está em uma sala!'}, room=sid)
             return
 
-    # Cria uma nova sala
-    sala_id = str(len(salas) + 1)  # Garantir que o ID da sala seja string
-    salas[sala_id] = [player_ids[sid]]  # Adiciona o jogador à sala
+    # Criação da sala
+    sala_id = str(len(salas) + 1)
+    salas[sala_id] = {
+        "sala_id": sala_id,
+        "jogadores": [player_ids[sid]],
+        "rodada": 0,
+        "baralho": [],  # Inicialize outros atributos se necessário
+    }
 
+    # O jogador entra na sala
     sio.enter_room(sid, sala_id)
 
-    listar_salas(sid)
-
+    # Emitir evento para o criador da sala (só ele recebe isso)
     sio.emit('sala_criada', {'sala_id': sala_id, 'status': 'criada'}, room=sid)
-    
+
+    # Emitir a lista de salas para todos os clientes
+    salas_info = [{'sala_id': sala_id, 'jogadores': sala['jogadores'], 'rodada': sala['rodada']} for sala_id, sala in salas.items()]
+    sio.emit('salas_disponiveis', {'salas': salas_info})  # Envia para todos os clientes
 
 @sio.event
 # Lógica de ingressar na sala, e iniciar partida caso atinga o máximo de jogadores
 def ingressar_sala(sid, sala_id):
     sala_id = str(sala_id)  # Garantir consistência no tipo
     if sala_id in salas:
+        print(len(salas[sala_id]))
+        print(salas[sala_id])
         if len(salas[sala_id]) < MAX_JOGADORES:
             salas[sala_id].append(player_ids[sid])  # Adiciona o jogador pela ID personalizada
             sio.enter_room(sid, sala_id)
             
-            listar_salas(sid)
+    
 
             sio.emit('sala_ingressada', {'sala_id': sala_id, 'status': 'ingressado'}, room=sid)
             
@@ -88,30 +97,46 @@ def ingressar_sala(sid, sala_id):
         sio.emit('erro_sala', {'mensagem': 'Sala inexistente!'}, room=sid)
 
 @sio.event
-def rodadas(sala_id):
-    
-    pass
-
-@sio.event
-def listar_salas(sid):
-    salas_info = {}
-    print("Listando salas...")
-
-    for sala_id, jogadores in salas.items():
-        salas_info[sala_id] = []
-        print(f"Sala {sala_id} tem os jogadores: {jogadores}")
+def rodadas(sid,sala_id):
+    sala_id = str(sala_id)  # Garantir consistência no tipo
+    if sala_id in salas:
+        sala = salas[sala_id]
+        if sala["rodada"] == 0:
+            pass
         
-        for jogador in jogadores:
-            # Verifica se o jogador (SID) está no dicionário player_ids
-            if jogador in player_ids.values():
-                print(f"Jogador {jogador} encontrado, ID: {jogador}")
-                salas_info[sala_id].append(jogador)  # Adiciona o ID personalizado
-            else:
-                print(f"Erro: player_id para SID {jogador} não encontrado em player_ids")
-                salas_info[sala_id].append("Desconhecido")  # Ou outro valor para indicar erro
-
-    print(f"Salas disponíveis: {salas_info}")
-    sio.emit('salas_disponiveis', salas_info, room=sid or None)
+        elif sala["rodada"] == 1:
+            pass
+        
+        elif sala["rodada"] == 2:
+            pass 
+        
+        elif sala["rodada"] == 3: # Verificar Vitória
+            pass 
+        
+        elif sala["rodada"] != 3:
+            victory = Victory()
+            sala = salas[sala_id]
+            
+            for j in sala["Jogadores"]:
+                print(j) 
+            #victory.verifyLogic(dealer,jogador,adversario)
+            sala["rodada"] += 1  # Avança para a próxima rodada
+        
+        sio.emit('nova_rodada', {'sala_id': sala_id, 'rodada': sala["rodada"]}, room=sala_id)
+    else:
+        sio.emit('erro', {'mensagem': 'Sala inexistente!'}, room=sid)
+        
+@sio.event
+def salas_disponiveis(data):  # Adicione 'data' como parâmetro
+    salas_info = []
+    for sala_id, sala_info in salas.items():  # Desempacotando chave (ID) e valor (informações da sala)
+        salas_info.append({
+            "sala_id": sala_id,  # Adicione o ID da sala para facilitar no cliente
+            "jogadores": sala_info["jogadores"],
+            "rodada": sala_info["rodada"],
+        })
+    print('imprimindo as salas info: ', salas_info)
+    sio.emit('salas_disponiveis', {'salas': salas_info})  # Envia para todos
 
 
 @sio.event
@@ -128,7 +153,6 @@ def disconnect(sid):
     if sid in player_ids:
         del player_ids[sid]
 
-    listar_salas(sid)
 
 # Inicia o servidor WSGI
 if __name__ == '__main__':

@@ -8,19 +8,33 @@ class ServidorSocket:
         # Registrando eventos
         self.id_player = None
         self.sid = None
+        self.atualizar_sala = None
         self.sio.on('connect', self.on_connect)
         self.sio.on('sala_criada', self.on_sala_criada)
         self.sio.on('erro_sala', self.on_erro_sala)
         self.sio.on('salas_disponiveis', self.on_salas_disponiveis)  # Novo evento
         self.sio.on('sid',self.my_sid)
+        self.sio.on('rodadas', self.rodadas)  # Novo evento
+
 
         self.sio.connect('http://localhost:4000')
        
         
     def on_connect(self):
         print("Conectado ao servidor!")
-        self.listar_salas()
+        self.sio.emit('salas_disponiveis')  # Envia uma solicitação para o servidor listar salas
 
+
+    def on_salas_disponiveis(self, data):
+        print("Evento 'salas_disponiveis' recebido")
+        print(f"Salas disponíveis recebidas: {data['salas']}")
+        self.salas_disponiveis = data["salas"]
+        print(f"Salas disponíveis: {self.salas_disponiveis}")
+        self.atualizar_sala = True
+        
+
+    def rodadas(self):
+        print("que rodada estamos?")
     # def my_id(self, data):
     #     self.id_player= data['player_id']
     #     print('idddd ',self.id_player)
@@ -37,6 +51,7 @@ class ServidorSocket:
         if data['status'] == 'criada':
             print(f"Sala {data['sala_id']} criada com sucesso!")
             self.sala_selecionada = data['sala_id']
+            
 
     def on_erro_sala(self, data):
         # Exibe uma mensagem de erro ao tentar criar uma sala
@@ -45,14 +60,7 @@ class ServidorSocket:
         # Exemplo simples:
         pyxel.text(10, 80, f"Erro: {data['mensagem']}", pyxel.COLOR_RED)
 
-    def on_salas_disponiveis(self, salas):
-        # Atualiza a lista de salas disponíveis no cliente
-        self.salas_disponiveis = salas
-        print(f"Salas disponíveis: {self.salas_disponiveis}")
 
-    def listar_salas(self):
-        # Solicitar salas disponíveis
-        self.sio.emit('listar_salas')
 
     def criar_sala(self):
         self.sio.emit('criar_sala')
