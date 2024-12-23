@@ -14,12 +14,22 @@ class ServidorSocket:
         self.sio.on('erro_sala', self.on_erro_sala)
         self.sio.on('salas_disponiveis', self.on_salas_disponiveis)  # Novo evento
         self.sio.on('sid',self.my_sid)
-        self.sio.on('rodadas', self.rodadas)  # Novo evento
+        self.sio.on('nova_rodada', self.handle_nova_rodada)
+      #  self.sio.on('init_game',self.init_game)
 
 
         self.sio.connect('http://localhost:4000')
        
-        
+    def chamar_nova_rodada(self, sala_id):
+        # Cliente envia pedido para o servidor iniciar nova rodada
+        self.sio.emit('nova_rodada', {'sala_id': sala_id})
+        print(f"Nova rodada solicitada para a sala {sala_id}")
+
+    def handle_nova_rodada(self, data):
+        # Salvar as informações recebidas na resposta do servidor
+        self.sala_atual = data  # Atualiza os dados da sala localmente
+        print("Recebemos dados atualizados da rodada:")
+        print(data)
     def on_connect(self):
         print("Conectado ao servidor!")
         self.sio.emit('salas_disponiveis')  # Envia uma solicitação para o servidor listar salas
@@ -33,8 +43,6 @@ class ServidorSocket:
         self.atualizar_sala = True
         
 
-    def rodadas(self):
-        print("que rodada estamos?")
     # def my_id(self, data):
     #     self.id_player= data['player_id']
     #     print('idddd ',self.id_player)

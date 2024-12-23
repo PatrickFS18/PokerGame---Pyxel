@@ -142,7 +142,7 @@ def rodadas(sid,sala_id):
         sio.emit('erro', {'mensagem': 'Sala inexistente!'}, room=sid)
         
 @sio.event
-def salas_disponiveis():  # Adicione 'data' como parâmetro
+def salas_disponiveis(data):  # Adicione 'data' como parâmetro
     salas_info = []
     for sala_id, sala_info in salas.items():  # Desempacotando chave (ID) e valor (informações da sala)
         salas_info.append({

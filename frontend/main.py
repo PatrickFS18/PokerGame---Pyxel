@@ -94,12 +94,10 @@ class Poker:
             pyxel.text(10, y_offset + 20, "Setas: navegar | ENTER: ingressar", pyxel.COLOR_GREEN)
         else:
             pyxel.cls(0)
-            
+            sala = self.cliente_socket.salas_disponiveis[self.sala_selecionada_index]
+            sala_id = sala["sala_id"]
             sala_atual = next((s for s in self.cliente_socket.salas_disponiveis if s.get("sala_id") == self.cliente_socket.sala_selecionada), None)
             if sala_atual:
-
-                print(len(sala_atual["jogadores"]))
-
 
                 pyxel.text(10, 10, f"Sala {self.cliente_socket.sala_selecionada} - Jogadores:", pyxel.COLOR_WHITE)
                 y_offset = 20
@@ -110,6 +108,6 @@ class Poker:
                     pyxel.text(10, y_offset + 20, "Aguardando jogadores...", pyxel.COLOR_RED)
                 else:
                     pyxel.text(10, y_offset + 20, "A partida já vai iniciar!", pyxel.COLOR_GREEN)
-
-                
+                    self.cliente_socket.chamar_nova_rodada(sala_id)
+                    print(self.jogador.mao)
 Poker()
