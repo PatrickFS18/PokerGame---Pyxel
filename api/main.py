@@ -122,6 +122,7 @@ def ingressar_sala(sid, sala_id):
                     print('dealer dict: ',dealer_dict)
                     # Emitir o evento com os jogadores e dealer convertidos
                     sio.emit('init_game', {
+                        'sala_id':sala_id,
                         'mensagem': 'A partida vai começar!',
                         'jogadores': jogadores_dict,
                         'dealer': dealer_dict

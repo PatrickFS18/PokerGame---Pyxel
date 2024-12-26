@@ -21,9 +21,29 @@ class ServidorSocket:
 
         self.sio.connect('http://localhost:4000')
 
-    def init_game(self,data):
-        print("recebemos dados! init game executada,: ",data)
-        pass
+    def init_game(self, data):
+        print("recebemos dados! init game executada,: ", data)
+
+        sala_id = data['sala_id']
+        jogadores_data = data['jogadores']
+        dealer_data = data['dealer']
+
+        # Encontrar a sala correspondente
+        for sala in self.salas_disponiveis:
+            if sala['sala_id'] == sala_id:
+                # Atribuir as mãos aos jogadores
+                for jogador_info in jogadores_data:
+                    jogador = next((j for j in sala['jogadores'] if j.id == jogador_info['id']), None)
+                    if jogador:
+                        jogador.mao = jogador_info['mao']  # Atribuir diretamente a lista de dicionários
+
+                # Atribuir a mão ao dealer
+                sala['dealer'].mao = dealer_data  # Atribuir diretamente a lista de dicionários
+                print(sala)
+
+                break
+        
+               
     def chamar_nova_rodada(self, sala_id):
         # Cliente envia pedido para o servidor iniciar nova rodada
         self.sio.emit('nova_rodada', {'sala_id': sala_id})
@@ -109,3 +129,8 @@ class ServidorSocket:
         else:
             print('ID do jogador não definido ou o jogador não está logado.')
             
+            
+
+
+
+
