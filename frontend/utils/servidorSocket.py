@@ -15,11 +15,15 @@ class ServidorSocket:
         self.sio.on('salas_disponiveis', self.on_salas_disponiveis)  # Novo evento
         self.sio.on('sid',self.my_sid)
         self.sio.on('nova_rodada', self.handle_nova_rodada)
-      #  self.sio.on('init_game',self.init_game)
+        
+        self.sio.on('init_game',self.init_game)
 
 
         self.sio.connect('http://localhost:4000')
-       
+
+    def init_game(self,data):
+        print("recebemos dados! init game executada,: ",data)
+        pass
     def chamar_nova_rodada(self, sala_id):
         # Cliente envia pedido para o servidor iniciar nova rodada
         self.sio.emit('nova_rodada', {'sala_id': sala_id})
@@ -30,6 +34,7 @@ class ServidorSocket:
         self.sala_atual = data  # Atualiza os dados da sala localmente
         print("Recebemos dados atualizados da rodada:")
         print(data)
+        
     def on_connect(self):
         print("Conectado ao servidor!")
         self.sio.emit('salas_disponiveis')  # Envia uma solicitação para o servidor listar salas
@@ -52,9 +57,6 @@ class ServidorSocket:
         self.sid= data['sid']
         self.id_player = data['player_id']
         
-        print('sidddd ',self.sid)
-        print('iddd ',self.id_player)
-        
     def on_sala_criada(self, data):
         if data['status'] == 'criada':
             print(f"Sala {data['sala_id']} criada com sucesso!")
@@ -75,10 +77,7 @@ class ServidorSocket:
 
     def ingressar_sala(self, sala_id):
         # Verifica se a sala existe e se o jogador não está em nenhuma sala
-        print('ingressando na sala linha 59')
         if self.id_player is not None:
-            print('ingressando na sala linha 61')
-            print('a sala: ',self.salas_disponiveis)
             jogador_em_sala = False
             quant_jogadores = 0
             sala_encontrada = False
@@ -95,11 +94,6 @@ class ServidorSocket:
                 if (self.id_player in sala["jogadores"]):
                     jogador_em_sala = True
             
-            print('id ta ali ', (sala_id in self.salas_disponiveis))
-            print('quantidade de jogadores: ',quant_jogadores)
-            print('self.sid: ',self.sid)
-            print('jogador ta em uma sala? ',jogador_em_sala)
-            print('Sala encontrada ', sala_encontrada)
             # Verifica se a sala está disponível e o jogador não está nela
             if (sala_encontrada == True) and (quant_jogadores < 2) and (self.sid is not None) and (jogador_em_sala == False):
                 print(f'Executando função para entrar na sala {sala_id}')

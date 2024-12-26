@@ -92,6 +92,7 @@ def ingressar_sala(sid, sala_id):
             sio.emit('sala_ingressada', {'sala_id': sala_id, 'status': 'ingressado'}, room=sid)
             
             if(len(salas[sala_id]["jogadores"]) == MAX_JOGADORES):
+                print('vendo os jogadores na sala: ',salas[sala_id]["jogadores"])
                 # A partida deve começar, e iniciar a distribuição de cartas
                 instanciar_cartas = InitGame()
                 sio.emit('salas_disponiveis', {'salas': salas_info})  # Atualiza todos os clientes
@@ -103,9 +104,29 @@ def ingressar_sala(sid, sala_id):
                  
                 cartas = instanciar_cartas.get_baralho(sala_id)
                 if (cartas is not None):
-                    jogadores,dealer = instanciar_cartas.distribuir_cartas(salas[sala_id]["jogadores"],cartas)
-                
-                    sio.emit('init_game', {'mensagem': 'A partida vai começar!','jogadores':jogadores,'dealer':dealer}, room=sid) # Retorna a lista de jogadores (instanciados na classe Jogador. Acessar jogador.mao)
+                    
+                   # Distribuir as cartas para os jogadores
+                    # ... No seu código de evento
+                    jogadores, dealer = instanciar_cartas.distribuir_cartas(salas[sala_id]["jogadores"], cartas)
+
+                    # Converter a lista de jogadores para uma lista de dicionários
+                    jogadores_dict = [jogador.to_dict() for jogador in jogadores]
+
+                    # Converter as cartas do dealer para uma lista de dicionários
+                    dealer_dict = [carta.to_dict() for carta in dealer.mao]
+
+                    # Converter as cartas dos jogadores (caso necessário)
+                    for jogador in jogadores_dict:
+                        jogador['mao'] = [carta.to_dict() for carta in jogador['mao']]
+                    print('jogadores dict: ',jogadores_dict)
+                    print('dealer dict: ',dealer_dict)
+                    # Emitir o evento com os jogadores e dealer convertidos
+                    sio.emit('init_game', {
+                        'mensagem': 'A partida vai começar!',
+                        'jogadores': jogadores_dict,
+                        'dealer': dealer_dict
+                    }, room=sid)
+
         else:
             sio.emit('erro_sala', {'mensagem': 'Sala cheia!'}, room=sid)
     else:

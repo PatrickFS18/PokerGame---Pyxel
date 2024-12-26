@@ -63,7 +63,7 @@ class Compare:
     def flush(self):
         self.order_cards(2)
         if self.common_naipe >= 5:
-            #filtrar hand ppelo common naipe
+            # Filtrar hand ppelo common naipe
             hand = self.hand
             straight = self.verify_straight(hand)
             filtered_hand = list(filter(lambda carta: carta.naipe == self.common_naipe, hand))
