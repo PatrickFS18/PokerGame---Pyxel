@@ -1,7 +1,5 @@
 import pyxel
 
-from utils.jogador import Jogador
-from utils.baralho import Baralho
 from collections import Counter
 from utils.servidorSocket import ServidorSocket
 # Conectando ao servidor
