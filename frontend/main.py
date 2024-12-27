@@ -73,7 +73,8 @@ class Poker:
 
         if pyxel.btnp(pyxel.KEY_I) and self.salas_list:
             sala_id = self.salas_list[self.sala_selecionada_index].get("sala_id")
-            if sala_id is not None:
+            sala_len = len(self.salas_list[self.sala_selecionada_index].get("jogadores"))
+            if sala_id is not None and sala_len < 2:
                 self.cliente_socket.ingressar_sala(sala_id)
                 self.cliente_socket.sala_selecionada = sala_id  # Garantir que a sala selecionada é atualizada
 
