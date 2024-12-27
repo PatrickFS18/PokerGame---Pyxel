@@ -6,20 +6,9 @@ from compare import Compare
 
 class Poker:
     def __init__(self):
-        #frontend
-        pyxel.init(256,144, title= "Poker Game")
-        pyxel.mouse(True)
-
-        # Detecta se o cursor está sobre uma das opções
-        pyxel.image(0).load(0, 0, "menu_background.png")  # Fundo do menu
-        pyxel.image(1).load(0, 0, "game_background.png")  # Fundo do jogo
-        self.mx = pyxel.mouse_x
-        self.my = pyxel.mouse_y
+       #backend
         self.selected_option = -1 # -1 = não selecionado, 0 = jogo local, 1 = jogo online
-        self.state = "menu"  # Estado inicial do jogo
-        pyxel.run(self.update,self.draw)
-
-        #backend
+        self.state = "menu"  # Estado inicial do jogo       
         self.jogador = Jogador()
         self.adversario = Jogador()
         self.dealer = Jogador()
@@ -28,6 +17,49 @@ class Poker:
         self.verify = True
         self.compare = None
 
+        self.position_cards = [ #(local x,local y, width, height, topox, topoy, centrox, centroy)
+                                (30,  38, 36, 52, 33, 41, 41, 60), # posição da carta 1
+                                ( 70,  38, 36, 52, 73, 41, 81, 60), # posição da carta 2
+                                ( 110,  38, 36, 52, 113, 41, 121, 60), # posição da carta 3
+                                ( 150,  38, 36, 52, 153, 41, 161, 60), # posição da carta 4
+                                ( 190,  38, 36, 52, 193, 41, 201, 60), # posição da carta 5
+                                ( 14,  126, 36, 52, 17, 129, 25, 148), # posição da carta 6
+                                ( 54,  126, 36, 52, 57, 129, 65, 148) # posição da carta 7
+                                ]
+        
+        self.position_itens = { 
+                            "Mesa" : ( 0,  0, 256, 192),
+                            "Carta" : ( 0,  192, 35, 51),
+                            "Verso" : ( 36,  192, 35, 51),
+                            "Paus" : ( 80,  192, 15, 15),
+                            "Copas" : ( 95,  192, 15, 15),
+                            "Espada" : ( 110,  192, 15, 15),
+                            "Ouro" : ( 125,  192, 15, 15),
+                            "1" : ( 246,  192, 9, 15 ),
+                            "2" : ( 155,  192, 15, 15),
+                            "3" : ( 170,  192, 15, 15),
+                            "4" : ( 185,  192, 15, 15),
+                            "5" : ( 200,  192, 15, 15),
+                            "6" : ( 215,  192, 15, 15),
+                            "7" : ( 230,  192, 15, 15),
+                            "8" : ( 120,  208, 15, 15),
+                            "9" : ( 85,  208, 15, 15),
+                            "10" : ( 147,  192, 15, 15),
+                            "11" : ( 100,  208, 6, 15),
+                            "12" : ( 106,  208, 7, 15),
+                            "13" : ( 113,  208, 7, 15)    
+                        }   
+        
+        #frontend
+        pyxel.init(256,192, title= "Poker Game")
+        pyxel.mouse(True)
+        self.mx = pyxel.mouse_x
+        self.my = pyxel.mouse_y
+
+        # Detecta se o cursor está sobre uma das opções
+        pyxel.load("my_resource.pyxres")
+        pyxel.images[0]
+        pyxel.run(self.update,self.draw)
         
     def initializedGame(self):
         if(self.is_initialized == False):
@@ -50,7 +82,11 @@ class Poker:
                 self.dealer.mao.append(cartas[i])
                 cartas.pop(0)
             self.is_initialized = True
-    
+        print("jogador = ", self.jogador.mao)
+        print("dealer = ", self.dealer.mao)
+        
+        
+
     def orderByValueAndNaipe(self,cards):
         
         # Ordem dos naipes (Paus, Ouro, Espada, Copas)
@@ -59,6 +95,7 @@ class Poker:
         # Ordena a mão,  primeiro pelo naipe e depois pelo valor
 
         cards = cards.sort(key = lambda carta: (order_naipes[carta.naipe], carta.valor))
+        print("cards ", cards)
         return cards
         
     def verifyLogic(self, dealer, jogador):
@@ -72,7 +109,7 @@ class Poker:
         #self.orderByValueAndNaipe(mao)
         #self.countEqualValues(mao)
         
-
+ 
     def update(self):
 
         self.mx = pyxel.mouse_x
@@ -83,12 +120,8 @@ class Poker:
 
         elif self.state == "local":
             self.initializedGame()
-
-            if(self.verify):#verifica uma vez a logica do jogo
-                self.verifyLogic(self.dealer,self.jogador)
-                self.state = "winner"
-        
             self.update_local()
+            
 
         elif self.state == "online":
             self.update_online()
@@ -106,16 +139,19 @@ class Poker:
         if local_game_button[0] <= self.mx <= local_game_button[2] and local_game_button[1] <= self.my <= local_game_button[3]:
             self.selected_option = 0
             if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
-                self.state == "local"
+                self.state = "local"
+                self.selected_option = -1
                 print("Iniciando Jogo Local")
 
         elif online_game_button[0] <= self.mx <= online_game_button[2] and online_game_button[1] <= self.my <= online_game_button[3]:
             self.selected_option = 1
             if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
-                self.state == "online"
+                self.state = "online"
+                self.selected_option = -1
                 print("Iniciando Jogo Online")
 
         elif rect_exit[0] <= self.mx <= rect_exit[2] and rect_exit[1] <= self.my <= rect_exit[3]:
+            self.selected_option = 2
             if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
                 pyxel.quit()  # Sai do jogo
 
@@ -123,8 +159,14 @@ class Poker:
             self.selected_option = -1  # Nenhuma opção está selecionada
 
     def update_local(self):
-        back_button = (230,15, 250, 35)  # (x1, y1, x2, y2) para voltar para o menu
-        pass
+        back_button = (243,3, 253, 13)  # (x1, y1, x2, y2) para voltar para o menu
+        if back_button[0] <= self.mx <= back_button[2] and back_button[1] <= self.my <= back_button[3]:
+            self.selected_option = 0
+            if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
+                self.state = "menu"  
+        else:
+            self.selected_option == -1
+
     def update_online(self):
         pass
     def update_winner(self):
@@ -143,7 +185,7 @@ class Poker:
 
     def draw_menu(self):
         # Título do Jogo
-        pyxel.text(102, 20, "Poker Game", pyxel.frame_count % 5)
+        pyxel.text(102, 20, "Poker Game", pyxel.frame_count %16)
 
         # Opção Jogo Local
         color_local = 11 if self.selected_option == 0 else 7
@@ -160,7 +202,44 @@ class Poker:
         pyxel.text(118, 117, "Sair", 0)
 
     def draw_local(self):
-        pass
+        pyxel.blt(0, 0, 0, 0, 0, 256, 192)
+
+        for i in range(len(self.dealer.mao)):
+            p_valor = self.position_itens[f'{self.dealer.mao[i].valor}']
+            p_naipe = self.position_itens[self.dealer.mao[i].naipe]
+            p_carta = self.position_cards[i]
+            #(local x,local y, width, height, topox, topoy, centrox, centroy)
+            
+            #(x plot, y plot, imagem, x imagem, y imagem, comprimento, altura)
+
+            #carta
+            pyxel.blt(p_carta[0], p_carta[1], 0, self.position_itens['Carta'][0], self.position_itens['Carta'][1], 36, 52)
+            #numero topo
+            pyxel.blt(p_carta[4], p_carta[5], 0, p_valor[0], p_valor[1], p_valor[2], p_valor[3])
+            #naipe centro
+            pyxel.blt(p_carta[6], p_carta[7], 0, p_naipe[0], p_naipe[1], p_naipe[2], p_naipe[3])
+           
+        for i in range(len(self.jogador.mao)):
+            p_valor = self.position_itens[f'{self.jogador.mao[i].valor}']
+            p_naipe = self.position_itens[self.jogador.mao[i].naipe]
+            p_carta = self.position_cards[i+5]
+            #(local x,local y, width, height, topox, topoy, centrox, centroy)
+            
+            #(x plot, y plot, imagem, x imagem, y imagem, comprimento, altura)
+
+            #carta
+            pyxel.blt(p_carta[0], p_carta[1], 0, self.position_itens['Carta'][0], self.position_itens['Carta'][1], 36, 52)
+            #numero topo
+            pyxel.blt(p_carta[4], p_carta[5], 0, p_valor[0], p_valor[1], p_valor[2], p_valor[3])
+            #naipe centro
+            pyxel.blt(p_carta[6], p_carta[7], 0, p_naipe[0], p_naipe[1], p_naipe[2], p_naipe[3])
+           
+                 
+        
+        color_Back = 8 if self.selected_option == 0 else 7
+        pyxel.rect(243,3, 10, 10, color_Back)
+        pyxel.text(246, 6, "X", 0)
+
 
     def draw_online(self):
         pass
