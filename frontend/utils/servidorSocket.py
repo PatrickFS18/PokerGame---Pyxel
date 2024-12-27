@@ -6,6 +6,7 @@ class ServidorSocket:
         self.salas_disponiveis = {}
         self.sala_selecionada = None
         # Registrando eventos
+        self.sala_atual = None
         self.id_player = None
         self.sid = None
         self.atualizar_sala = None
