@@ -31,19 +31,23 @@ class ServidorSocket:
         # Encontrar a sala correspondente
         for sala in self.salas_disponiveis:
             if sala['sala_id'] == sala_id:
+                # Certifique-se de que a entrada para o dealer existe
+                if 'dealer' not in sala:
+                    sala['dealer'] = {}
+
                 # Atribuir as mãos aos jogadores
                 for jogador_info in jogadores_data:
-                    jogador = next((j for j in sala['jogadores'] if j.id == jogador_info['id']), None)
+                    jogador = next((j for j in sala['jogadores'] if j['id'] == jogador_info['id']), None)
                     if jogador:
-                        jogador.mao = jogador_info['mao']  # Atribuir diretamente a lista de dicionários
+                        jogador['mao'] = jogador_info['mao']  # Atribuir diretamente a lista de dicionários
 
                 # Atribuir a mão ao dealer
-                sala['dealer'].mao = dealer_data  # Atribuir diretamente a lista de dicionários
-                print(sala)
+                sala['dealer']['mao'] = dealer_data  # Atribuir diretamente a lista de dicionários
 
                 break
-        
-               
+
+
+
     def chamar_nova_rodada(self, sala_id):
         # Cliente envia pedido para o servidor iniciar nova rodada
         self.sio.emit('nova_rodada', {'sala_id': sala_id})
@@ -61,10 +65,10 @@ class ServidorSocket:
 
 
     def on_salas_disponiveis(self, data):
-        print("Evento 'salas_disponiveis' recebido")
-        print(f"Salas disponíveis recebidas: {data['salas']}")
+        #print("Evento 'salas_disponiveis' recebido")
+        #print(f"Salas disponíveis recebidas: {data['salas']}")
         self.salas_disponiveis = data["salas"]
-        print(f"Salas disponíveis: {self.salas_disponiveis}")
+        #print(f"Salas disponíveis: {self.salas_disponiveis}")
         self.atualizar_sala = True
         
 

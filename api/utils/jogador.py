@@ -1,18 +1,18 @@
+
 class Jogador:
-    def __init__(self):
+    def __init__(self, id):
         self.mao = []
         self.jogada = 1
         self.sala_selecionada = None
-        self.id = None
+        self.id = id
     
     def to_dict(self):
         return {
-            'mao': self.mao,
+            'id': self.id,
+            'mao': [carta.to_dict() for carta in self.mao],
             'jogada': self.jogada,
-            'sala_selecionada': self.sala_selecionada,
-            'id': self.id
+            'sala_selecionada': self.sala_selecionada
         }
-
-    def __str__(self):
-        return str(self.to_dict())
-
+    
+    def __repr__(self):
+        return repr(self.to_dict())

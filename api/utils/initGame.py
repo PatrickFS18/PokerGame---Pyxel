@@ -1,11 +1,12 @@
 from utils.jogador import Jogador
 from utils.baralho import Baralho
+from utils.carta import Carta  # Certifique-se de importar a classe Carta
 
 class InitGame:
     def __init__(self):
         self.baralhos = []
         
-    def init_game(self,sala_id):
+    def init_game(self, sala_id):
         baralho = Baralho()
         baralho.gerarCartas()
         baralho.embaralharCartas()
@@ -24,24 +25,22 @@ class InitGame:
 
     def distribuir_cartas(self, sala, baralho):
         jogadores = []  # Lista para armazenar os objetos Jogador
-        dealer = Jogador()
+        dealer = Jogador('dealer')
         for player_id in sala:
-            jogador = Jogador()
-            jogador.id = player_id
+            jogador = Jogador(player_id)
 
             # Distribuir 2 cartas únicas para o jogador
             for _ in range(2):  # 2 cartas por jogador
                 if baralho:  # Verificar se ainda há cartas no baralho
-                    jogador.mao.append(baralho.pop(0))  # Remover carta do topo do baralho
+                    carta_info = baralho.pop(0)
+                    jogador.mao.append(carta_info if isinstance(carta_info, Carta) else Carta(carta_info))
             
             jogadores.append(jogador)  # Adicionar o jogador à lista
-        dealer.id = 'dealer'
+        
+        # Distribuir 5 cartas para o dealer
         for _ in range(5):
             if baralho:
-                dealer.mao.append(baralho.pop(0))
+                carta_info = baralho.pop(0)
+                dealer.mao.append(carta_info if isinstance(carta_info, Carta) else Carta(carta_info))
 
-        return jogadores,dealer  # Retorna a lista de jogadores
-                
-    #         for i in range (0,5):
-    #             self.dealer.mao.append(cartas[i])
-    #             cartas.pop(0)
+        return jogadores, dealer  # Retorna a lista de jogadores e o dealer
