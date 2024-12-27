@@ -85,7 +85,7 @@ class Poker:
             y_offset = 20
             for index, sala in enumerate(self.cliente_socket.salas_disponiveis):
                 sala_id = sala.get("sala_id", "N/A")
-                jogadores_str = ', '.join([f"Player {j}" for j in sala.get("jogadores", [])])
+                jogadores_str = ', '.join([f"Player {j['id']}" for j in sala.get("jogadores", [])])
                 color = pyxel.COLOR_YELLOW if index == self.sala_selecionada_index else pyxel.COLOR_WHITE
                 pyxel.text(10, y_offset, f"Sala {sala_id}: {jogadores_str}", color)
                 y_offset += 10
@@ -101,20 +101,41 @@ class Poker:
                 if sala_atual:
                     pyxel.text(10, 10, f"Sala {self.cliente_socket.sala_selecionada} - Jogadores:", pyxel.COLOR_WHITE)
                     y_offset = 20
-                    
-                    for j in sala_atual.get("jogadores", []):
-                        # Verifica se j é um dicionário antes de acessar a chave "id"
-                        if isinstance(j, dict) and j.get("id") == self.cliente_socket.id_player:
-                            jogadores_str = ', '.join([f"Player {jogador['mao']}" for jogador in sala_atual.get("jogadores", [])])
-                            pyxel.text(10, y_offset, jogadores_str, pyxel.COLOR_WHITE)
+                    pyxel.text(10, 70, f"Player {self.cliente_socket.id_player}", pyxel.COLOR_RED)
 
+                    for j in sala_atual.get("jogadores", []):
+                        if isinstance(j, dict) and j.get("id") == self.cliente_socket.id_player:
+                            jogadores_str = ', '.join([f"Player {jogador['id']}" for jogador in sala_atual.get("jogadores", [])])
+                            pyxel.text(10, y_offset, jogadores_str, pyxel.COLOR_WHITE)
+            
                     if len(sala_atual["jogadores"]) < 2:
                         pyxel.text(10, y_offset + 20, "Aguardando jogadores...", pyxel.COLOR_RED)
                     else:
+                        
                         pyxel.text(10, y_offset + 20, "A partida já vai iniciar!", pyxel.COLOR_GREEN)
-                        if(sala["rodada"] == 0):
-                            
+                        if sala["rodada"] == 0:
                             self.cliente_socket.chamar_nova_rodada(sala_id)
-                            print('ssala atual é: ',sala_atual)
                             sala["rodada"] = 1
+
+                        # Exibir cartas do dealer e do jogador com o ID atual
+                        self.draw_cartas_dealer_e_jogador(sala_atual)
+
+    def draw_cartas_dealer_e_jogador(self, sala_atual):
+        pyxel.cls(0)
+        pyxel.text(10, 70, f"Player {self.cliente_socket.id_player}", pyxel.COLOR_RED)
+        
+        pyxel.text(10, 10, f"Sala {self.cliente_socket.sala_selecionada} - Jogadores:", pyxel.COLOR_WHITE)
+        
+        y_offset = 20
+        for j in sala_atual.get("jogadores", []):
+            if isinstance(j, dict) and j.get("id") == self.cliente_socket.id_player:
+                jogador_mao = j["mao"]
+                pyxel.text(10, y_offset, f"Suas cartas: {jogador_mao}", pyxel.COLOR_WHITE)
+                y_offset += 10
+        
+        if 'dealer' in sala_atual:
+            dealer_mao = sala_atual["dealer"]["mao"]
+            pyxel.text(10, y_offset + 20, f"Cartas do dealer: {dealer_mao}", pyxel.COLOR_WHITE)
+
+
 Poker()
