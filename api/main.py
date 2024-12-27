@@ -134,7 +134,7 @@ def rodadas(sid, sala_id):
             pass 
         
         elif sala["rodada"] == 3:  # Verificar Vitória
-            pass 
+            pass  #teste
         
         elif sala["rodada"] != 3:
             victory = Victory()
