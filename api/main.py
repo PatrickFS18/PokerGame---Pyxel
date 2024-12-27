@@ -163,23 +163,32 @@ def salas_disponiveis(data):
 
 @sio.event
 def disconnect(sid):
-    # Remove o jogador das salas e do mapeamento
-    for sala_id, jogadores in list(salas.items()):
-        if player_ids[sid] in jogadores:  # Verifica o ID do jogador
-            jogadores.remove(player_ids[sid])  # Remove o jogador pela ID personalizada
-            if not jogadores:
-                del salas[sala_id]
+    jogador_id = player_ids.get(sid)
+    if jogador_id is None:
+        return  # O jogador já foi desconectado ou não estava conectado
+
+    # Remover o jogador da sala e do mapeamento
+    sala_a_remover = None
+    for sala_id, sala in list(salas.items()):
+        if jogador_id in [j['id'] if isinstance(j, dict) else j.id for j in sala["jogadores"]]:
+            sala["jogadores"] = [j for j in sala["jogadores"] if (j['id'] if isinstance(j, dict) else j.id) != jogador_id]
+            if not sala["jogadores"]:  # Se não houver mais jogadores, marcar a sala para remoção
+                sala_a_remover = sala_id
             break
 
-    # Remove o jogador de player_ids
-    if sid in player_ids:
-        del player_ids[sid]
+    # Remover a sala se não houver jogadores restantes
+    if sala_a_remover:
+        del salas[sala_a_remover]
+
+    # Remover o jogador de player_ids
+    del player_ids[sid]
     
+    # Atualizar a lista de salas disponíveis para todos os clientes
     salas_info = []
-    for sala_id, sala_info in salas.items():  # Desempacotando chave (ID) e valor (informações da sala)
+    for sala_id, sala_info in salas.items():
         salas_info.append({
-            "sala_id": sala_id,  # Adicione o ID da sala para facilitar no cliente
-            "jogadores": sala_info["jogadores"],
+            "sala_id": sala_id,
+            "jogadores": [j.to_dict() if isinstance(j, Jogador) else j for j in sala_info["jogadores"]],
             "rodada": sala_info["rodada"],
         })
     sio.emit('salas_disponiveis', {'salas': salas_info})  # Atualiza todos os clientes
