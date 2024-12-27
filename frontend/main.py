@@ -61,7 +61,7 @@ class Poker:
         return cards
 
     def update(self):
-        salas_list = self.cliente_socket.salas_disponiveis
+        self.salas_list = self.cliente_socket.salas_disponiveis
 
         if pyxel.btnp(pyxel.KEY_C):
             self.cliente_socket.criar_sala()
@@ -69,10 +69,10 @@ class Poker:
         if pyxel.btnp(pyxel.KEY_UP):
             self.sala_selecionada_index = max(0, self.sala_selecionada_index - 1)
         if pyxel.btnp(pyxel.KEY_DOWN): 
-            self.sala_selecionada_index = min(len(salas_list) - 1, self.sala_selecionada_index + 1)
+            self.sala_selecionada_index = min(len(self.salas_list) - 1, self.sala_selecionada_index + 1)
 
-        if pyxel.btnp(pyxel.KEY_I) and salas_list:
-            sala_id = salas_list[self.sala_selecionada_index].get("sala_id")
+        if pyxel.btnp(pyxel.KEY_I) and self.salas_list:
+            sala_id = self.salas_list[self.sala_selecionada_index].get("sala_id")
             if sala_id is not None:
                 self.cliente_socket.ingressar_sala(sala_id)
                 self.cliente_socket.sala_selecionada = sala_id  # Garantir que a sala selecionada é atualizada
@@ -94,19 +94,18 @@ class Poker:
             pyxel.text(10, y_offset + 20, "Setas: navegar | ENTER: ingressar", pyxel.COLOR_GREEN)
         else:
             pyxel.cls(0)
-            if self.cliente_socket.salas_disponiveis[self.sala_selecionada_index] is not None:
+            if (0 <= self.sala_selecionada_index < len(self.cliente_socket.salas_disponiveis)) and self.cliente_socket.salas_disponiveis[self.sala_selecionada_index] is not None:
                 sala = self.cliente_socket.salas_disponiveis[self.sala_selecionada_index]
                 sala_id = sala["sala_id"]
                 sala_atual = next((s for s in self.cliente_socket.salas_disponiveis if s.get("sala_id") == self.cliente_socket.sala_selecionada), None)
                 if sala_atual:
                     pyxel.text(10, 10, f"Sala {self.cliente_socket.sala_selecionada} - Jogadores:", pyxel.COLOR_WHITE)
                     y_offset = 20
-                    print('MEU ID ', self.cliente_socket.id_player)
-
+                    
                     for j in sala_atual.get("jogadores", []):
                         # Verifica se j é um dicionário antes de acessar a chave "id"
                         if isinstance(j, dict) and j.get("id") == self.cliente_socket.id_player:
-                            jogadores_str = ', '.join([f"Player {jogador['id']}" for jogador in sala_atual.get("jogadores", [])])
+                            jogadores_str = ', '.join([f"Player {jogador['mao']}" for jogador in sala_atual.get("jogadores", [])])
                             pyxel.text(10, y_offset, jogadores_str, pyxel.COLOR_WHITE)
 
                     if len(sala_atual["jogadores"]) < 2:
