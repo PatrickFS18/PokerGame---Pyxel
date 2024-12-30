@@ -313,33 +313,46 @@ class Poker:
             pyxel.cls(0)
             
             if (0 <= self.sala_selecionada_index < len(self.cliente_socket.salas_disponiveis)) and self.cliente_socket.salas_disponiveis[self.sala_selecionada_index] is not None:
+                # Sala selecionada disponível e não nula
                 
+                # Pega a sala atual
                 
                 sala = self.cliente_socket.salas_disponiveis[self.sala_selecionada_index]
                 sala_id = sala["sala_id"]
                 self.sala_atual = next((s for s in self.cliente_socket.salas_disponiveis if s.get("sala_id") == self.cliente_socket.sala_selecionada), None)
                 
+                # Se tiver sala atuals
                 if self.sala_atual:
-                    #Aqui deve desenhar 
+                    #Aqui deve desenhar o caso de só ter um jogador. Aguardando outro entrar
+                     
                     pyxel.text(10, 10, f"Sala {self.cliente_socket.sala_selecionada} - Jogadores:", pyxel.COLOR_WHITE)
                     y_offset = 20
                     pyxel.text(10, 70, f"Player {self.cliente_socket.id_player}", pyxel.COLOR_RED)
 
+                    # For para adicionar em uma string os jogadores na sala
+                    
                     for j in self.sala_atual.get("jogadores", []):
                         if isinstance(j, dict) and j.get("id") == self.cliente_socket.id_player:
                             jogadores_str = ', '.join([f"Player {jogador['id']}" for jogador in self.sala_atual.get("jogadores", [])])
                             pyxel.text(10, y_offset, jogadores_str, pyxel.COLOR_WHITE)
-            
+                    
+                    # Verifica quantidade de jogadores na sala
+                    
                     if len(self.sala_atual["jogadores"]) < 2:
                         pyxel.text(10, y_offset + 20, "Aguardando jogadores...", pyxel.COLOR_RED)
+                    
+                    # Se fechar a sala com os 2 jogadores, exibir a sala
                     else:
+                        
+                        # Se já tiver um vencedor, ou empate, exibe
                         if self.cliente_socket.winner is not None:
                             if self.cliente_socket.winner == 0:
                                 pyxel.text(20, 60, f"Empate!!", pyxel.COLOR_GREEN)
                             else:
                                 pyxel.text(20, 60, f"O ganhador é o jogador {self.cliente_socket.winner}!", pyxel.COLOR_GREEN)
                             
-
+                        # Exibir a mesa e cartas
+                        
                         sala = self.cliente_socket.salas_disponiveis[self.sala_selecionada_index]
                         
                         # Exibir cartas do dealer e do jogador com o ID atual
