@@ -25,8 +25,8 @@ class Poker:
         self.position_chips = [ # local x, local y, comprimento, altura, x1, y1, x2,y2
                                 (136, 208, 24, 24, 105, 150, 129,174),
                                 (160, 208, 24, 24, 137, 150, 161,174),
-                                (184, 208, 24, 24, 193, 150, 217,174),
-                                (208, 208, 24, 24, 225, 150, 249,174)
+                                (184, 208, 24, 24, 169, 150, 217,174),
+                                (208, 208, 24, 24, 201, 150, 249,174)
                                 ]
         self.position_itens = { 
                             "Mesa" : ( 0,  0, 256, 192),
@@ -162,7 +162,7 @@ class Poker:
         elif self.chips: 
             # BUTOES DAS FICHAS, PS: N MEXE NISSO Q TTA DIREITIN
             for c in self.position_chips: 
-                if c[4] <= self.mx <= c [5] and c [6] <= self.my <= c [7]:
+                if c[4] <= self.mx <= c[5] and c[6] <= self.my <= c[7]:
                     if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
 
                         self.chips = False
@@ -261,26 +261,24 @@ class Poker:
                 #naipe centro
                 pyxel.blt(p_carta[6], p_carta[7], 0, p_naipe[0], p_naipe[1], p_naipe[2], p_naipe[3])
             
-        color_desistir = 8 if self.selected_option == 1 else 7
+        color_desistir = 8 if self.selected_option == 3 else 7
         pyxel.rect(98, 120, 40, 20, color_desistir)
-        pyxel.text(110, 132, "Desistir", 0)
+        pyxel.text(102, 127, "Desistir", 0)
 
-        color_apostar = 5 if self.selected_option == 1 else 7
+        color_apostar = 5 if self.selected_option == 4 else 7
         pyxel.rect(145, 120, 40, 20, color_apostar)
-        pyxel.text(154, 132, "Apostar", 0)
+        pyxel.text(151, 127, "Apostar", 0)
 
-        color_passar = 12 if self.selected_option == 1 else 7
+        color_passar = 12 if self.selected_option == 5 else 7
         pyxel.rect(192, 120, 40, 20, color_passar)
-        pyxel.text(220, 132, "Passar", 0)
+        pyxel.text(201, 127, "Passar", 0)
 
         if self.chips:
-            for L in range(len(self.position_chips)):
+            for L in self.position_chips:
                 # local x, local y, comprimento, altura, x1, y1, x2,y2
-
-                pyxel.blt(L[0], L[1], 0, L[4], L[5], 24,24)    
-            
+                pyxel.blt(L[4], L[5], 0, L[0], L[1], 24,24)    
             # pyxel.text(10, 70, f"Player {self.cliente_socket.id_player}", pyxel.COLOR_RED)
-            
+
             # pyxel.text(10, 10, f"Sala {self.cliente_socket.sala_selecionada} - Jogadores:", pyxel.COLOR_WHITE)
 
     def draw_menu(self):
