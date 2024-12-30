@@ -7,7 +7,7 @@ class Poker:
     def __init__(self):
         self.cliente_socket = ServidorSocket()
         self.sala_selecionada_index = 0
-        self.rodada = 1 
+        self.rodada = 0
         self.sala_id = None
         self.salas_list = None
         self.sala_atual = None
@@ -88,6 +88,9 @@ class Poker:
         
     def draw_cartas_dealer_e_jogador(self, sala_atual,rodada):
         pyxel.cls(0)
+        if self.cliente_socket.sala_atual_info is not None:
+            self.rodada = self.cliente_socket.sala_atual_info['rodada']
+            rodada = self.rodada
         
         pyxel.blt(0, 0, 0, 0, 0, 256, 192)
         jogador_mao = None
@@ -102,10 +105,10 @@ class Poker:
             if 'dealer' in sala_atual:
                 dealer_mao = sala_atual["dealer"]["mao"]                    
             
-        if jogador_mao and dealer_mao is not None:      
+        if jogador_mao is not None and dealer_mao is not None:      
 
             for i in range(len(dealer_mao)):
-                if(i+1 <= sala_atual["rodada"] + 2):
+                if(i <= rodada + 2):
                     p_valor = self.position_itens[f'{dealer_mao[i]["valor"]}']
                     p_naipe = self.position_itens[dealer_mao[i]["naipe"]]
                     p_carta = self.position_cards[i]
@@ -317,8 +320,8 @@ class Poker:
                         if self.cliente_socket.sala_atual_info is not None and self.cliente_socket.sala_atual_info['rodada'] == 2:
                             pass
                         # Exibir cartas do dealer e do jogador com o ID atual
-                        if self.cliente_socket.sala_atual_info is not None:
-                            self.draw_cartas_dealer_e_jogador(self.sala_atual,self.cliente_socket.sala_atual_info['rodada'])
+                            
+                        self.draw_cartas_dealer_e_jogador(self.sala_atual,self.rodada)
                                             
                     
 

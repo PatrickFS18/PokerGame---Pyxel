@@ -18,9 +18,11 @@ class ServidorSocket:
         self.sio.on('nova_rodada', self.handle_nova_rodada)
         
         self.sio.on('init_game',self.init_game)
+        self.sio.on('vencedor', self.vencedor)
 
 
         self.sio.connect('http://localhost:4000')
+
 
     def init_game(self, data):
         print("recebemos dados! init game executada,: ", data)
@@ -47,6 +49,10 @@ class ServidorSocket:
 
                 break
 
+    def vencedor(self,data):
+        self.winner = data["vencedor"]
+        print('temos um vencedor! ',self.winner)
+        
     def chamar_nova_rodada(self, sala_id):
         # Cliente envia pedido para o servidor iniciar nova rodada
         self.sio.emit('nova_rodada',sala_id)
