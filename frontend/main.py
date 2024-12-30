@@ -122,17 +122,7 @@ class Poker:
             self.sala_selecionada_index = max(0, self.sala_selecionada_index - 1)
         if pyxel.btnp(pyxel.KEY_DOWN) and self.state == "online": 
             self.sala_selecionada_index = min(len(self.salas_list) - 1, self.sala_selecionada_index + 1)
-            
-        if pyxel.btnp(pyxel.KEY_RIGHT) and self.state == "online":
-            sala_id = self.salas_list[self.sala_selecionada_index].get("sala_id")
-            print(self.cliente_socket.sala_atual_info)
-            if(self.cliente_socket.sala_atual_info is None):
-                self.cliente_socket.chamar_nova_rodada(sala_id,self.cliente_socket.id_player) # Chama novo turno também. verificação na API por quem solicitou
-
-            if self.cliente_socket.sala_atual_info is not None:
-                print('RODADA ATUAL:  ',self.cliente_socket.sala_atual_info["rodada"])
-                self.cliente_socket.chamar_nova_rodada(sala_id,self.cliente_socket.id_player) # Chama novo turno também. verificação na API por quem solicitou
-            
+                
         if pyxel.btnp(pyxel.KEY_I) and self.salas_list and self.state == "online":
             self.sala_id = self.salas_list[self.sala_selecionada_index].get("sala_id")
             sala_len = len(self.salas_list[self.sala_selecionada_index].get("jogadores"))
@@ -173,16 +163,25 @@ class Poker:
             # BUTOES DAS FICHAS, PS: N MEXE NISSO Q TTA DIREITIN
             for c in self.position_chips: 
                 if c[4] <= self.mx <= c [5] and c [6] <= self.my <= c [7]:
-                    self.chips = False
+                    if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
+
+                        self.chips = False
+                        sala_id = self.salas_list[self.sala_selecionada_index].get("sala_id")
+                        self.cliente_socket.chamar_nova_rodada(sala_id,self.cliente_socket.id_player) # Chama novo turno também. verificação na API por quem solicitou
+
                     #SE CLICAR NA FICHA MUDA A RODADA
                     #self.cliente_socket.sala_atual_info['rodada'] +=1
-                    pass            
 
         #OPACIDADE DO BOTAO DE PASSAR
         elif b_passar [0] <= self.mx <= b_passar [2] and b_passar [1] <= self.my <= b_passar [3]:
+
             self.selected_option = 5
             if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
+                sala_id = self.salas_list[self.sala_selecionada_index].get("sala_id")
+
                 self.selected_option = 0
+                self.cliente_socket.chamar_nova_rodada(sala_id,self.cliente_socket.id_player) # Chama novo turno também. verificação na API por quem solicitou
+
                 #self.cliente_socket.sala_atual_info['rodada'] +=1
                 pass    
 
@@ -315,9 +314,11 @@ class Poker:
             
             if (0 <= self.sala_selecionada_index < len(self.cliente_socket.salas_disponiveis)) and self.cliente_socket.salas_disponiveis[self.sala_selecionada_index] is not None:
                 
+                
                 sala = self.cliente_socket.salas_disponiveis[self.sala_selecionada_index]
                 sala_id = sala["sala_id"]
                 self.sala_atual = next((s for s in self.cliente_socket.salas_disponiveis if s.get("sala_id") == self.cliente_socket.sala_selecionada), None)
+                
                 if self.sala_atual:
                     #Aqui deve desenhar 
                     pyxel.text(10, 10, f"Sala {self.cliente_socket.sala_selecionada} - Jogadores:", pyxel.COLOR_WHITE)
