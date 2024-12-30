@@ -100,20 +100,21 @@ class Poker:
         if jogador_mao and dealer_mao is not None:      
 
             for i in range(len(dealer_mao)):
-                p_valor = self.position_itens[f'{dealer_mao[i]["valor"]}']
-                p_naipe = self.position_itens[dealer_mao[i]["naipe"]]
-                p_carta = self.position_cards[i]
-                #(local x,local y, width, height, topox, topoy, centrox, centroy)
-                
-                #(x plot, y plot, imagem, x imagem, y imagem, comprimento, altura)
+                if(i+1 <= sala_atual["rodada"] + 2):
+                    p_valor = self.position_itens[f'{dealer_mao[i]["valor"]}']
+                    p_naipe = self.position_itens[dealer_mao[i]["naipe"]]
+                    p_carta = self.position_cards[i]
+                    #(local x,local y, width, height, topox, topoy, centrox, centroy)
+                    
+                    #(x plot, y plot, imagem, x imagem, y imagem, comprimento, altura)
 
-                #carta
-                pyxel.blt(p_carta[0], p_carta[1], 0, self.position_itens['Carta'][0], self.position_itens['Carta'][1], 36, 52)
-                #numero topo
-                pyxel.blt(p_carta[4], p_carta[5], 0, p_valor[0], p_valor[1], p_valor[2], p_valor[3])
-                #naipe centro
-                pyxel.blt(p_carta[6], p_carta[7], 0, p_naipe[0], p_naipe[1], p_naipe[2], p_naipe[3])
-            
+                    #carta
+                    pyxel.blt(p_carta[0], p_carta[1], 0, self.position_itens['Carta'][0], self.position_itens['Carta'][1], 36, 52)
+                    #numero topo
+                    pyxel.blt(p_carta[4], p_carta[5], 0, p_valor[0], p_valor[1], p_valor[2], p_valor[3])
+                    #naipe centro
+                    pyxel.blt(p_carta[6], p_carta[7], 0, p_naipe[0], p_naipe[1], p_naipe[2], p_naipe[3])
+                
             for i in range(len(jogador_mao)):
                 p_valor = self.position_itens[f'{jogador_mao[i]["valor"]}']
                 p_naipe = self.position_itens[jogador_mao[i]["naipe"]]
@@ -191,7 +192,8 @@ class Poker:
             self.sala_selecionada_index = max(0, self.sala_selecionada_index - 1)
         if pyxel.btnp(pyxel.KEY_DOWN) and self.state == "online": 
             self.sala_selecionada_index = min(len(self.salas_list) - 1, self.sala_selecionada_index + 1)
-
+        if pyxel.btnp(pyxel.KEY_RIGHT) and self.state == "online":
+            pass
         if pyxel.btnp(pyxel.KEY_I) and self.salas_list and self.state == "online":
             sala_id = self.salas_list[self.sala_selecionada_index].get("sala_id")
             sala_len = len(self.salas_list[self.sala_selecionada_index].get("jogadores"))
