@@ -120,10 +120,19 @@ def ingressar_sala(sid, sala_id):
         sio.emit('erro_sala', {'mensagem': 'Sala inexistente!'}, room=sid)
 
 @sio.event
-def rodadas(sid, sala_id):
-    sala_id = str(sala_id)  # Garantir consistência no tipo
-    if sala_id in salas:
-        sala = salas[sala_id]
+def nova_rodada(sid, data):
+    sala_id = str(data)  # Garantir consistência no tipo
+    print('aqui chamou com sala_id:', sala_id)
+    sala_encontrada = None
+    
+    # Procurar pela sala correspondente no dicionário
+    for id, sala in salas.items():
+        if sala["sala_id"] == sala_id:
+            sala_encontrada = sala
+            break
+    
+    if sala_encontrada:
+        sala = sala_encontrada
         if sala["rodada"] == 0:
             pass
         
@@ -134,17 +143,20 @@ def rodadas(sid, sala_id):
             pass 
         
         elif sala["rodada"] == 3:  # Verificar Vitória
-            pass  #teste
+            pass  # teste
         
-        elif sala["rodada"] != 3:
+        else:
             victory = Victory()
-            sala = salas[sala_id]
             
-            for j in sala["jogadores"]:
-                print(j) 
-            #victory.verifyLogic(dealer, jogador, adversario)
-            sala["rodada"] += 1  # Avança para a próxima rodada
+        sala = sala_encontrada
         
+        for j in sala["jogadores"]:
+            print(j) 
+        # victory.verifyLogic(dealer, jogador, adversario)
+        sala["rodada"] += 1  # Avança para a próxima rodada
+        print(f"Rodada atualizada para: {sala['rodada']}")
+        
+        print('realmente aumentou a rodada')
         sio.emit('nova_rodada', {'sala_id': sala_id, 'rodada': sala["rodada"]}, room=sala_id)
     else:
         sio.emit('erro', {'mensagem': 'Sala inexistente!'}, room=sid)
