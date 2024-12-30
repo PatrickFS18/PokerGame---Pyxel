@@ -8,6 +8,9 @@ class Poker:
         self.cliente_socket = ServidorSocket()
         self.sala_selecionada_index = 0 
         self.salas_list = None
+        self.selected_option = -1 #-1 é nada
+        self.state = 'menu'
+
         self.position_cards = [ #(local x,local y, width, height, topox, topoy, centrox, centroy)
                                 (30,  38, 36, 52, 33, 41, 41, 60), # posição da carta 1
                                 ( 70,  38, 36, 52, 73, 41, 81, 60), # posição da carta 2
@@ -40,7 +43,6 @@ class Poker:
                             "12" : ( 106,  208, 7, 15),
                             "13" : ( 113,  208, 7, 15)    
                         }   
-        self.state = 'menu'
         #frontend
         pyxel.init(256,192, title= "Poker Game")
         
@@ -53,24 +55,21 @@ class Poker:
         pyxel.run(self.update,self.draw)
         
     def update(self):
-        self.mx = pyxel.mouse_x
-        self.my = pyxel.mouse_y
+        self.salas_list = self.cliente_socket.salas_disponiveis
 
         if self.state == "menu":
             self.update_menu()
 
-        elif self.state == "local":
-            self.update_local()
+        elif self.state == "rooms":
+            self.cliente_socket.criar_sala()
+            self.update_rooms()
             
-        elif self.state == "online":
-            self.update_online()
+        elif self.state == "game":
+            self.update_game()
 
         elif self.state == "winner":
             self.update_winner()
-        self.salas_list = self.cliente_socket.salas_disponiveis
-
-        if pyxel.btnp(pyxel.KEY_C):
-            self.cliente_socket.criar_sala()
+        
 
         if pyxel.btnp(pyxel.KEY_UP):
             self.sala_selecionada_index = max(0, self.sala_selecionada_index - 1)
@@ -83,7 +82,50 @@ class Poker:
             if sala_id is not None and sala_len < 2:
                 self.cliente_socket.ingressar_sala(sala_id)
                 self.cliente_socket.sala_selecionada = sala_id  # Garantir que a sala selecionada é atualizada
+    
+
+    def update_menu(self):
         
+        start_button = (98, 60, 158, 80)  # (x1, y1, x2, y2) para Jogo Local
+        
+        rect_exit = (98, 100, 158, 120)  # Sair do Jogo
+
+        if start_button[0] <= self.mx <= start_button[2] and start_button[1] <= self.my <= start_button[3]:
+            
+            self.selected_option = 0
+            if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
+                self.state = "rooms"
+                self.selected_option = -1
+                print("Iniciando Jogo Local")
+
+
+        elif rect_exit[0] <= self.mx <= rect_exit[2] and rect_exit[1] <= self.my <= rect_exit[3]:
+            
+            self.selected_option = 2
+            if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
+                pyxel.quit()  # Sai do jogo
+
+        else:
+            
+            self.selected_option = -1  # Nenhuma opção está selecionada
+
+    def update_rooms(self):
+        
+        back_button = (243,3, 253, 13)  # (x1, y1, x2, y2) para voltar para o menu
+        if back_button[0] <= self.mx <= back_button[2] and back_button[1] <= self.my <= back_button[3]:
+            
+            self.selected_option = 0
+            if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
+                self.state = "menu"  
+        else:
+            self.selected_option == -1
+
+    def update_game(self):
+        pass
+    def update_winner(self):
+        pass
+
+
     def draw(self):
         pyxel.cls(0)
         if self.state == "menu":
@@ -157,57 +199,6 @@ class Poker:
             
             dealer_mao = sala_atual["dealer"]["mao"]
             pyxel.text(10, y_offset + 20, f"Cartas do dealer: {dealer_mao}", pyxel.COLOR_WHITE)
-
-
-    def update_menu(self):
-        
-        local_game_button = (98, 50, 158, 70)  # (x1, y1, x2, y2) para Jogo Local
-        online_game_button = (98, 80, 158, 100)  # (x1, y1, x2, y2) para Jogo Online
-        rect_exit = (98, 110, 158, 130)  # Sair do Jogo
-
-        if local_game_button[0] <= self.mx <= local_game_button[2] and local_game_button[1] <= self.my <= local_game_button[3]:
-            
-            self.selected_option = 0
-            if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
-                self.state = "local"
-                self.selected_option = -1
-                print("Iniciando Jogo Local")
-
-        elif online_game_button[0] <= self.mx <= online_game_button[2] and online_game_button[1] <= self.my <= online_game_button[3]:
-            
-            self.selected_option = 1
-            if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
-                self.state = "online"
-                self.selected_option = -1
-                print("Iniciando Jogo Online")
-
-        elif rect_exit[0] <= self.mx <= rect_exit[2] and rect_exit[1] <= self.my <= rect_exit[3]:
-            
-            self.selected_option = 2
-            if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
-                pyxel.quit()  # Sai do jogo
-
-        else:
-            
-            self.selected_option = -1  # Nenhuma opção está selecionada
-
-    def update_local(self):
-        
-        back_button = (243,3, 253, 13)  # (x1, y1, x2, y2) para voltar para o menu
-        if back_button[0] <= self.mx <= back_button[2] and back_button[1] <= self.my <= back_button[3]:
-            
-            self.selected_option = 0
-            if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
-                self.state = "menu"  
-        else:
-            self.selected_option == -1
-
-    def update_online(self):
-        pass
-    def update_winner(self):
-        pass
-
-    
 
     def draw_menu(self):
         # Título do Jogo
