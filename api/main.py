@@ -1,4 +1,3 @@
-import os
 import socketio
 from utils.jogador import Jogador
 from utils.victory import Victory
@@ -194,12 +193,10 @@ def disconnect(sid):
         })
     sio.emit('salas_disponiveis', {'salas': salas_info})  # Atualiza todos os clientes
 
-sio = socketio.Server(cors_allowed_origins=["https://poker-pyxel-a16f85e125a4.herokuapp.com","http://localhost:3000", "http://localhost:4000", "*"])
+sio = socketio.Server(cors_allowed_origins=["http://localhost:3000", "http://localhost:4000", "*"])
 
-port = int(os.environ.get("PORT", 4000))
 # Inicia o servidor WSGI
 if __name__ == '__main__':
     import eventlet
     app = socketio.WSGIApp(sio)
-    eventlet.wsgi.server(eventlet.listen(('0.0.0.0', port)), app)
-    
+    eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 4000)), app)
