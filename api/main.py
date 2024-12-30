@@ -12,7 +12,6 @@ salas = {}
 MAX_JOGADORES = 2  # Limite de jogadores por sala
 player_id_counter = 1
 player_ids = {}
-
 @sio.event
 def connect(sid, environ, auth):
     global player_id_counter
@@ -26,6 +25,7 @@ def connect(sid, environ, auth):
             "sala_id": sala_id,  # Adicione o ID da sala para facilitar no cliente
             "jogadores": [j.to_dict() for j in sala_info["jogadores"]],
             "rodada": sala_info["rodada"],
+            "dealer": sala_info.get("dealer", {'mao': []}),  # Inclui o dealer se ele existir, caso contrário, uma lista vazia
         })
     sio.emit('salas_disponiveis', {'salas': salas_info})  # Atualiza todos os clientes
     
@@ -54,6 +54,7 @@ def criar_sala(sid):
         "jogadores": [jogador],
         "rodada": 0,
         "baralho": [],  # Inicialize outros atributos se necessário
+        "dealer": {'mao': []}  # Inclua a chave dealer com uma lista vazia
     }
 
     # O jogador entra na sala
@@ -63,8 +64,9 @@ def criar_sala(sid):
     sio.emit('sala_criada', {'sala_id': sala_id, 'status': 'criada'}, room=sid)
 
     # Emitir a lista de salas para todos os clientes
-    salas_info = [{'sala_id': sala_id, 'jogadores': [j.to_dict() for j in sala['jogadores']], 'rodada': sala['rodada']} for sala_id, sala in salas.items()]
+    salas_info = [{'sala_id': sala_id, 'jogadores': [j.to_dict() for j in sala['jogadores']], 'rodada': sala['rodada'], 'dealer': sala['dealer']} for sala_id, sala in salas.items()]
     sio.emit('salas_disponiveis', {'salas': salas_info})  # Envia para todos os clientes
+    
 @sio.event
 def ingressar_sala(sid, sala_id):
     sala_id = str(sala_id)  # Garantir consistência no tipo
@@ -81,6 +83,7 @@ def ingressar_sala(sid, sala_id):
                     "sala_id": sala_id,  # Adicione o ID da sala para facilitar no cliente
                     "jogadores": [j.to_dict() for j in sala_info["jogadores"]],
                     "rodada": sala_info["rodada"],
+                    "dealer": sala_info.get("dealer", {'mao': []}),  # Inclua o dealer se ele existir, caso contrário, uma lista vazia
                 })
             sio.emit('salas_disponiveis', {'salas': salas_info})  # Atualiza todos os clientes
 
@@ -100,8 +103,15 @@ def ingressar_sala(sid, sala_id):
                     # Distribuir as cartas para os jogadores
                     jogadores, dealer = instanciar_cartas.distribuir_cartas([j.id for j in salas[sala_id]["jogadores"]], cartas)
 
+                    # Atualizar os objetos dos jogadores na sala
+                    for i, jogador_obj in enumerate(salas[sala_id]["jogadores"]):
+                        jogador_obj.mao = jogadores[i].mao
+
+                    # Atualizar o objeto do dealer na sala
+                    salas[sala_id]["dealer"]["mao"] = dealer.mao
+
                     # Converter a lista de jogadores para uma lista de dicionários
-                    jogadores_dict = [jogador.to_dict() for jogador in jogadores]
+                    jogadores_dict = [jogador.to_dict() for jogador in salas[sala_id]["jogadores"]]
 
                     # Converter as cartas do dealer para uma lista de dicionários
                     dealer_dict = [carta.to_dict() for carta in dealer.mao]
@@ -113,7 +123,7 @@ def ingressar_sala(sid, sala_id):
                         'jogadores': jogadores_dict,
                         'dealer': dealer_dict
                     }, room=sala_id)
-
+                    print(salas)
         else:
             sio.emit('erro_sala', {'mensagem': 'Sala cheia!'}, room=sid)
     else:
@@ -121,46 +131,52 @@ def ingressar_sala(sid, sala_id):
 
 @sio.event
 def nova_rodada(sid, data):
-    sala_id = str(data)  # Garantir consistência no tipo
-    print('aqui chamou com sala_id:', sala_id)
-    sala_encontrada = None
+    victory = Victory()
+    sala_id = str(data["sala_id"])  # Garantir consistência no tipo
+    id_player = data["id_player"]  # ID do jogador que solicitou a nova rodada
+    print(f'aqui chamou com sala_id: {sala_id} pelo jogador {id_player}')
     
+    sala_encontrada = None
     # Procurar pela sala correspondente no dicionário
     for id, sala in salas.items():
-        if sala["sala_id"] == sala_id:
+        if id == sala_id:
             sala_encontrada = sala
             break
     
     if sala_encontrada:
         sala = sala_encontrada
-        if sala["rodada"] == 0:
-            pass
         
-        elif sala["rodada"] == 1:
-            pass
+        # Verificar se é a vez do jogador correspondente
+        rodada = sala["rodada"]
+        jogador_permitido = sala["jogadores"][0].id if rodada % 2 != 0 else sala["jogadores"][1].id
         
-        elif sala["rodada"] == 2:
-            pass 
-        
-        elif sala["rodada"] == 3:  # Verificar Vitória
-            pass  # teste
-        
-        else:
-            victory = Victory()
+        if id_player != jogador_permitido:
+            sio.emit('erro', {'mensagem': 'Não é a sua vez de jogar!'}, room=sid)
             
-        sala = sala_encontrada
-        
-        for j in sala["jogadores"]:
-            print(j) 
-        # victory.verifyLogic(dealer, jogador, adversario)
-        sala["rodada"] += 1  # Avança para a próxima rodada
-        print(f"Rodada atualizada para: {sala['rodada']}")
-        
-        print('realmente aumentou a rodada')
+            return
+        else:
+            
+            if sala["rodada"] < 6:
+                sala["rodada"] += 1
+        # Atualizar a rodada
+            if sala["rodada"] == 6:
+            # VERIFICAR GANHADOR
+                if len(sala["jogadores"]) >= 2:
+                    jogador = sala["jogadores"][0]
+                    adversario = sala["jogadores"][1]
+                    dealer = sala["dealer"]
+                    if jogador is not None and dealer is not None and adversario is not None and sala["rodada"] == 6:
+                        victory.verifyLogic(dealer, jogador, adversario)
+                    if victory.winner is not None:
+                        sio.emit('vencedor', {'sala_id': sala_id, 'vencedor': victory.winner, 'rodada': sala["rodada"]}, room=sala_id)
+                    else:
+                        sio.emit('erro', {'mensagem': 'Sala inexistente!'}, room=sid)
+
         sio.emit('nova_rodada', {'sala_id': sala_id, 'rodada': sala["rodada"]}, room=sala_id)
+        print(f"Rodada atualizada para: {sala['rodada']}")
     else:
         sio.emit('erro', {'mensagem': 'Sala inexistente!'}, room=sid)
-
+        
 @sio.event
 def salas_disponiveis(data):
     salas_info = []
@@ -169,6 +185,7 @@ def salas_disponiveis(data):
             "sala_id": sala_id,  # Adicione o ID da sala para facilitar no cliente
             "jogadores": [j.to_dict() for j in sala_info["jogadores"]],
             "rodada": sala_info["rodada"],
+            "dealer": sala_info.get("dealer", {'mao': []}),  # Inclua o dealer se ele existir, caso contrário, uma lista vazia
         })
     print('imprimindo as salas info: ', salas_info)
     sio.emit('salas_disponiveis', {'salas': salas_info})  # Envia para todos
@@ -202,8 +219,10 @@ def disconnect(sid):
             "sala_id": sala_id,
             "jogadores": [j.to_dict() if isinstance(j, Jogador) else j for j in sala_info["jogadores"]],
             "rodada": sala_info["rodada"],
+            "dealer": sala_info.get("dealer", {'mao': []}),  # Inclua o dealer se ele existir, caso contrário, uma lista vazia
+            
         })
-    sio.emit('salas_disponiveis', {'salas': salas_info})  # Atualiza todos os clientes
+        sio.emit('salas_disponiveis', {'salas': salas_info})  # Atualiza todos os clientes
 
 
 # Inicia o servidor WSGI

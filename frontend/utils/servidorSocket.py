@@ -8,7 +8,9 @@ class ServidorSocket:
         # Registrando eventos
         self.sala_atual_info = None
         self.id_player = None
+        self.winner = None
         self.sid = None
+        self.desistir = False
         self.atualizar_sala = None
         self.sio.on('connect', self.on_connect)
         self.sio.on('sala_criada', self.on_sala_criada)
@@ -18,9 +20,11 @@ class ServidorSocket:
         self.sio.on('nova_rodada', self.handle_nova_rodada)
         
         self.sio.on('init_game',self.init_game)
+        self.sio.on('vencedor', self.vencedor)
 
 
         self.sio.connect('http://localhost:4000')
+
 
     def init_game(self, data):
         print("recebemos dados! init game executada,: ", data)
@@ -47,10 +51,14 @@ class ServidorSocket:
 
                 break
 
-    def chamar_nova_rodada(self, sala_id):
+    def vencedor(self,data):
+        self.winner = data["vencedor"]
+        print('temos um vencedor! ',self.winner)
+        
+    def chamar_nova_rodada(self, sala_id, id_player):
         # Cliente envia pedido para o servidor iniciar nova rodada
-        self.sio.emit('nova_rodada',sala_id)
-        print(f"Nova rodada solicitada para a sala {sala_id}")
+        self.sio.emit('nova_rodada', {'sala_id': sala_id, 'id_player': id_player})
+        print(f"Nova rodada solicitada para a sala {sala_id} pelo jogador {id_player}")
 
     def handle_nova_rodada(self, data):
         # Salvar as informações recebidas na resposta do servidor
