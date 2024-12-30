@@ -6,8 +6,14 @@ from utils.servidorSocket import ServidorSocket
 class Poker:
     def __init__(self):
         self.cliente_socket = ServidorSocket()
-        self.sala_selecionada_index = 0 
+        self.sala_selecionada_index = 0
+        self.rodada = 0
+        self.sala_id = None
         self.salas_list = None
+        self.sala_atual = None
+        self.proxima_carta = False
+        self.rodada_solicitada = False 
+        self.turn = 0 # 0 para jogador 1, 1 para jogador 2
         self.position_cards = [ #(local x,local y, width, height, topox, topoy, centrox, centroy)
                                 (30,  38, 36, 52, 33, 41, 41, 60), # posição da carta 1
                                 ( 70,  38, 36, 52, 73, 41, 81, 60), # posição da carta 2
@@ -79,10 +85,13 @@ class Poker:
         elif self.state == "online":
             self.draw_online()    
         elif self.state == "winner":
-            self.draw_winner()
+            self.draw_online()
         
-    def draw_cartas_dealer_e_jogador(self, sala_atual):
+    def draw_cartas_dealer_e_jogador(self, sala_atual,rodada):
         pyxel.cls(0)
+        if self.cliente_socket.sala_atual_info is not None:
+            self.rodada = self.cliente_socket.sala_atual_info['rodada']
+            rodada = self.rodada
         
         pyxel.blt(0, 0, 0, 0, 0, 256, 192)
         jogador_mao = None
@@ -97,24 +106,24 @@ class Poker:
             if 'dealer' in sala_atual:
                 dealer_mao = sala_atual["dealer"]["mao"]                    
             
-        if jogador_mao and dealer_mao is not None:      
+        if jogador_mao is not None and dealer_mao is not None:      
 
-            for i in range(len(dealer_mao)):
-                if(i+1 <= sala_atual["rodada"] + 2):
-                    p_valor = self.position_itens[f'{dealer_mao[i]["valor"]}']
-                    p_naipe = self.position_itens[dealer_mao[i]["naipe"]]
-                    p_carta = self.position_cards[i]
-                    #(local x,local y, width, height, topox, topoy, centrox, centroy)
-                    
-                    #(x plot, y plot, imagem, x imagem, y imagem, comprimento, altura)
-
-                    #carta
-                    pyxel.blt(p_carta[0], p_carta[1], 0, self.position_itens['Carta'][0], self.position_itens['Carta'][1], 36, 52)
-                    #numero topo
-                    pyxel.blt(p_carta[4], p_carta[5], 0, p_valor[0], p_valor[1], p_valor[2], p_valor[3])
-                    #naipe centro
-                    pyxel.blt(p_carta[6], p_carta[7], 0, p_naipe[0], p_naipe[1], p_naipe[2], p_naipe[3])
+            for i in range(len(dealer_mao) - (3 - rodada // 2)): # Lógica para contar a partir da terceira carta
+            
+                p_valor = self.position_itens[f'{dealer_mao[i]["valor"]}']
+                p_naipe = self.position_itens[dealer_mao[i]["naipe"]]
+                p_carta = self.position_cards[i]
+                #(local x,local y, width, height, topox, topoy, centrox, centroy)
                 
+                #(x plot, y plot, imagem, x imagem, y imagem, comprimento, altura)
+
+                #carta
+                pyxel.blt(p_carta[0], p_carta[1], 0, self.position_itens['Carta'][0], self.position_itens['Carta'][1], 36, 52)
+                #numero topo
+                pyxel.blt(p_carta[4], p_carta[5], 0, p_valor[0], p_valor[1], p_valor[2], p_valor[3])
+                #naipe centro
+                pyxel.blt(p_carta[6], p_carta[7], 0, p_naipe[0], p_naipe[1], p_naipe[2], p_naipe[3])
+            
             for i in range(len(jogador_mao)):
                 p_valor = self.position_itens[f'{jogador_mao[i]["valor"]}']
                 p_naipe = self.position_itens[jogador_mao[i]["naipe"]]
@@ -187,22 +196,38 @@ class Poker:
     def update_online(self):
         if pyxel.btnp(pyxel.KEY_C) and self.state == "online":
             self.cliente_socket.criar_sala()
-
         if pyxel.btnp(pyxel.KEY_UP) and self.state == "online":
             self.sala_selecionada_index = max(0, self.sala_selecionada_index - 1)
         if pyxel.btnp(pyxel.KEY_DOWN) and self.state == "online": 
             self.sala_selecionada_index = min(len(self.salas_list) - 1, self.sala_selecionada_index + 1)
+            
         if pyxel.btnp(pyxel.KEY_RIGHT) and self.state == "online":
-            pass
-        if pyxel.btnp(pyxel.KEY_I) and self.salas_list and self.state == "online":
             sala_id = self.salas_list[self.sala_selecionada_index].get("sala_id")
+            print(self.cliente_socket.sala_atual_info)
+            if(self.cliente_socket.sala_atual_info is None):
+                self.cliente_socket.chamar_nova_rodada(sala_id,self.cliente_socket.id_player) # Chama novo turno também. verificação na API por quem solicitou
+
+            if self.cliente_socket.sala_atual_info is not None:
+                print('RODADA ATUAL:  ',self.cliente_socket.sala_atual_info["rodada"])
+                self.cliente_socket.chamar_nova_rodada(sala_id,self.cliente_socket.id_player) # Chama novo turno também. verificação na API por quem solicitou
+            
+        if pyxel.btnp(pyxel.KEY_I) and self.salas_list and self.state == "online":
+            self.sala_id = self.salas_list[self.sala_selecionada_index].get("sala_id")
             sala_len = len(self.salas_list[self.sala_selecionada_index].get("jogadores"))
-            if sala_id is not None and sala_len < 2:
-                self.cliente_socket.ingressar_sala(sala_id)
-                self.cliente_socket.sala_selecionada = sala_id  # Garantir que a sala selecionada é atualizada
+            if self.sala_id is not None and sala_len < 2:
+                self.cliente_socket.ingressar_sala(self.sala_id)
+                self.cliente_socket.sala_selecionada = self.sala_id  # Garantir que a sala selecionada é atualizada
         
     def update_winner(self):
-        pass
+        
+        if pyxel.btnp(pyxel.KEY_R):
+            if self.cliente_socket.winner:
+                self.winner = self.cliente_socket.winner
+
+            # nao faz nada ainda
+# Variáveis de controle:
+
+    
 
     
 
@@ -282,38 +307,38 @@ class Poker:
             pyxel.text(10, y_offset + 20, "Setas: navegar | ENTER: ingressar", pyxel.COLOR_GREEN)
         else:
             pyxel.cls(0)
+            
             if (0 <= self.sala_selecionada_index < len(self.cliente_socket.salas_disponiveis)) and self.cliente_socket.salas_disponiveis[self.sala_selecionada_index] is not None:
                 
                 sala = self.cliente_socket.salas_disponiveis[self.sala_selecionada_index]
                 sala_id = sala["sala_id"]
-                sala_atual = next((s for s in self.cliente_socket.salas_disponiveis if s.get("sala_id") == self.cliente_socket.sala_selecionada), None)
-                
-                if sala_atual:
+                self.sala_atual = next((s for s in self.cliente_socket.salas_disponiveis if s.get("sala_id") == self.cliente_socket.sala_selecionada), None)
+                if self.sala_atual:
                     #Aqui deve desenhar 
                     pyxel.text(10, 10, f"Sala {self.cliente_socket.sala_selecionada} - Jogadores:", pyxel.COLOR_WHITE)
                     y_offset = 20
                     pyxel.text(10, 70, f"Player {self.cliente_socket.id_player}", pyxel.COLOR_RED)
 
-                    for j in sala_atual.get("jogadores", []):
+                    for j in self.sala_atual.get("jogadores", []):
                         if isinstance(j, dict) and j.get("id") == self.cliente_socket.id_player:
-                            jogadores_str = ', '.join([f"Player {jogador['id']}" for jogador in sala_atual.get("jogadores", [])])
+                            jogadores_str = ', '.join([f"Player {jogador['id']}" for jogador in self.sala_atual.get("jogadores", [])])
                             pyxel.text(10, y_offset, jogadores_str, pyxel.COLOR_WHITE)
             
-                    if len(sala_atual["jogadores"]) < 2:
+                    if len(self.sala_atual["jogadores"]) < 2:
                         pyxel.text(10, y_offset + 20, "Aguardando jogadores...", pyxel.COLOR_RED)
                     else:
-#                        pyxel.text(10, y_offset + 20, "A partida já vai iniciar!", pyxel.COLOR_GREEN)
-                        
-                        if sala["rodada"] == 0:
-                            self.cliente_socket.chamar_nova_rodada(sala_id)
-                            sala["rodada"] = 1
-                        # Exibir cartas do dealer e do jogador com o ID atual
-                        print(sala_atual)
-                        self.draw_cartas_dealer_e_jogador(sala_atual)
-                                            
-                    
+                        if self.cliente_socket.winner is not None:
+                            if self.cliente_socket.winner == 0:
+                                pyxel.text(20, 60, f"Empate!!", pyxel.COLOR_GREEN)
+                            else:
+                                pyxel.text(20, 60, f"O ganhador é o jogador {self.cliente_socket.winner}!", pyxel.COLOR_GREEN)
+                            
 
-    def draw_winner(self):
-        pass
+                        sala = self.cliente_socket.salas_disponiveis[self.sala_selecionada_index]
+                        
+                        # Exibir cartas do dealer e do jogador com o ID atual
+                            
+                        self.draw_cartas_dealer_e_jogador(self.sala_atual,self.rodada)
+                                            
 
 Poker()
