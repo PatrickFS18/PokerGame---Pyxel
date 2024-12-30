@@ -231,9 +231,8 @@ class Poker:
                 #carta
                 pyxel.blt(p_carta[0], p_carta[1], 0, self.position_itens['Verso'][0], self.position_itens['Verso'][1], 36, 52) 
                 
-            for i in range(len(dealer_mao)-(3-rodada)): #explico dps
-                #if(i+1 <= sala_atual["rodada"] + 2):
-
+            for i in range(len(dealer_mao) - (3 - rodada // 2)): # Lógica para contar a partir da terceira carta
+            
                 p_valor = self.position_itens[f'{dealer_mao[i]["valor"]}']
                 p_naipe = self.position_itens[dealer_mao[i]["naipe"]]
                 p_carta = self.position_cards[i]
@@ -247,19 +246,19 @@ class Poker:
                 pyxel.blt(p_carta[4], p_carta[5], 0, p_valor[0], p_valor[1], p_valor[2], p_valor[3])
                 #naipe centro
                 pyxel.blt(p_carta[6], p_carta[7], 0, p_naipe[0], p_naipe[1], p_naipe[2], p_naipe[3])
-                
+            
             for i in range(len(jogador_mao)):
                 p_valor = self.position_itens[f'{jogador_mao[i]["valor"]}']
                 p_naipe = self.position_itens[jogador_mao[i]["naipe"]]
                 p_carta = self.position_cards[i+5]
-
+                
                 #carta
                 pyxel.blt(p_carta[0], p_carta[1], 0, self.position_itens['Carta'][0], self.position_itens['Carta'][1], 36, 52)
                 #numero topo
                 pyxel.blt(p_carta[4], p_carta[5], 0, p_valor[0], p_valor[1], p_valor[2], p_valor[3])
                 #naipe centro
                 pyxel.blt(p_carta[6], p_carta[7], 0, p_naipe[0], p_naipe[1], p_naipe[2], p_naipe[3])
-        
+            
         color_desistir = 8 if self.selected_option == 1 else 7
         pyxel.rect(98, 120, 40, 20, color_desistir)
         pyxel.text(110, 132, "Desistir", 0)
