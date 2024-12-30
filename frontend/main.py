@@ -210,7 +210,10 @@ class Poker:
             #self.draw_winner()
         
     def draw_cartas_dealer_e_jogador(self, sala_atual,rodada):
-        
+                                
+        if self.cliente_socket.sala_atual_info is not None:
+            self.rodada = self.cliente_socket.sala_atual_info["rodada"]
+            rodada = int(self.rodada)
         pyxel.blt(0, 0, 0, 0, 0, 256, 192)
         jogador_mao = None
         dealer_mao = None
@@ -225,27 +228,27 @@ class Poker:
                 dealer_mao = sala_atual["dealer"]["mao"]                    
             
         if jogador_mao and dealer_mao is not None:      
-            for v in range(5):
+            for i in range(5):
                 p_carta = self.position_cards[i] 
                 #carta
                 pyxel.blt(p_carta[0], p_carta[1], 0, self.position_itens['Verso'][0], self.position_itens['Verso'][1], 36, 52) 
                 
-            for i in range(len(dealer_mao) - (3 - rodada // 2)): # Lógica para contar a partir da terceira carta
-            
-                p_valor = self.position_itens[f'{dealer_mao[i]["valor"]}']
-                p_naipe = self.position_itens[dealer_mao[i]["naipe"]]
-                p_carta = self.position_cards[i]
-                #(local x,local y, width, height, topox, topoy, centrox, centroy)
-                
-                #(x plot, y plot, imagem, x imagem, y imagem, comprimento, altura)
+            for i in range(len(dealer_mao)): # Lógica para contar a partir da terceira carta
+                if(i <= rodada // 2 + 2):
+                    p_valor = self.position_itens[f'{dealer_mao[i]["valor"]}']
+                    p_naipe = self.position_itens[dealer_mao[i]["naipe"]]
+                    p_carta = self.position_cards[i]
+                    #(local x,local y, width, height, topox, topoy, centrox, centroy)
+                    
+                    #(x plot, y plot, imagem, x imagem, y imagem, comprimento, altura)
 
-                #carta
-                pyxel.blt(p_carta[0], p_carta[1], 0, self.position_itens['Carta'][0], self.position_itens['Carta'][1], 36, 52)
-                #numero topo
-                pyxel.blt(p_carta[4], p_carta[5], 0, p_valor[0], p_valor[1], p_valor[2], p_valor[3])
-                #naipe centro
-                pyxel.blt(p_carta[6], p_carta[7], 0, p_naipe[0], p_naipe[1], p_naipe[2], p_naipe[3])
-            
+                    #carta
+                    pyxel.blt(p_carta[0], p_carta[1], 0, self.position_itens['Carta'][0], self.position_itens['Carta'][1], 36, 52)
+                    #numero topo
+                    pyxel.blt(p_carta[4], p_carta[5], 0, p_valor[0], p_valor[1], p_valor[2], p_valor[3])
+                    #naipe centro
+                    pyxel.blt(p_carta[6], p_carta[7], 0, p_naipe[0], p_naipe[1], p_naipe[2], p_naipe[3])
+                
             for i in range(len(jogador_mao)):
                 p_valor = self.position_itens[f'{jogador_mao[i]["valor"]}']
                 p_naipe = self.position_itens[jogador_mao[i]["naipe"]]
@@ -356,8 +359,7 @@ class Poker:
                         sala = self.cliente_socket.salas_disponiveis[self.sala_selecionada_index]
                         
                         # Exibir cartas do dealer e do jogador com o ID atual
-                        if self.cliente_socket.sala_atual_info is not None:
-                            self.draw_cartas_dealer_e_jogador(self.sala_atual,self.cliente_socket.sala_atual_info['rodada'])
+                        self.draw_cartas_dealer_e_jogador(self.sala_atual,self.rodada)
                                                 
     pass
     ## def draw_winner(self):                
