@@ -170,7 +170,7 @@ def nova_rodada(sid, data):
             victory.verifyLogic(dealer, jogador, adversario)
             
         if victory.winner is not None:
-            sio.emit('vencedor', {'sala_id': sala_id, 'vencedor': victory.winner}, room=sala_id)
+            sio.emit('vencedor', {'sala_id': sala_id, 'vencedor': victory.winner,'rodada':sala["rodada"]}, room=sala_id)
         
         if sala["rodada"] < 3:
             sala["rodada"] += 1  # Avança para a próxima rodada

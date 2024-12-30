@@ -8,7 +8,10 @@ class ServidorSocket:
         # Registrando eventos
         self.sala_atual_info = None
         self.id_player = None
+        self.vez = False
+        self.winner = None
         self.sid = None
+        self.desistir = False
         self.atualizar_sala = None
         self.sio.on('connect', self.on_connect)
         self.sio.on('sala_criada', self.on_sala_criada)

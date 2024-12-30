@@ -13,6 +13,7 @@ class Poker:
         self.sala_atual = None
         self.proxima_carta = False
         self.rodada_solicitada = False 
+        self.turn = 0 # 0 para jogador 1, 1 para jogador 2
         self.position_cards = [ #(local x,local y, width, height, topox, topoy, centrox, centroy)
                                 (30,  38, 36, 52, 33, 41, 41, 60), # posição da carta 1
                                 ( 70,  38, 36, 52, 73, 41, 81, 60), # posição da carta 2
@@ -84,7 +85,7 @@ class Poker:
         elif self.state == "online":
             self.draw_online()    
         elif self.state == "winner":
-            self.draw_winner()
+            self.draw_online()
         
     def draw_cartas_dealer_e_jogador(self, sala_atual,rodada):
         pyxel.cls(0)
@@ -201,9 +202,17 @@ class Poker:
             self.sala_selecionada_index = min(len(self.salas_list) - 1, self.sala_selecionada_index + 1)
         if pyxel.btnp(pyxel.KEY_RIGHT) and self.state == "online":
             sala_id = self.salas_list[self.sala_selecionada_index].get("sala_id")
-
+            if self.turn == 0:
+                print(f"Jogador 1 fez sua jogada.")
+                self.turn = 1  # Passar a vez para o jogador 2
+            elif self.turn == 1:
+                print(f"Jogador 2 fez sua jogada.")
+                # Chamar nova rodada quando o jogador 2 faz sua jogada
+                sala_id = self.salas_list[self.sala_selecionada_index].get("sala_id")
+                print('Chamando nova rodada.. para a sala: ', sala_id)
+                self.cliente_socket.chamar_nova_rodada(sala_id)
+                self.turn = 0  # Resetar a vez para o jogador 1
             print('chamando nova rodada.. para a sala: ',sala_id)
-            self.cliente_socket.chamar_nova_rodada(sala_id)
 
         if pyxel.btnp(pyxel.KEY_I) and self.salas_list and self.state == "online":
             self.sala_id = self.salas_list[self.sala_selecionada_index].get("sala_id")
@@ -211,9 +220,21 @@ class Poker:
             if self.sala_id is not None and sala_len < 2:
                 self.cliente_socket.ingressar_sala(self.sala_id)
                 self.cliente_socket.sala_selecionada = self.sala_id  # Garantir que a sala selecionada é atualizada
+        if self.cliente_socket.sala_atual_info is not None and self.cliente_socket.sala_atual_info['rodada'] == 2:
+            print('verificar ganhador...')
+            self.state = "winner"
+            pass
         
     def update_winner(self):
-        pass
+        
+        if pyxel.btnp(pyxel.KEY_R):
+            if self.cliente_socket.winner:
+                self.winner = self.cliente_socket.winner
+
+            # nao faz nada ainda
+# Variáveis de controle:
+
+    
 
     
 
@@ -293,6 +314,7 @@ class Poker:
             pyxel.text(10, y_offset + 20, "Setas: navegar | ENTER: ingressar", pyxel.COLOR_GREEN)
         else:
             pyxel.cls(0)
+            
             if (0 <= self.sala_selecionada_index < len(self.cliente_socket.salas_disponiveis)) and self.cliente_socket.salas_disponiveis[self.sala_selecionada_index] is not None:
                 
                 sala = self.cliente_socket.salas_disponiveis[self.sala_selecionada_index]
@@ -312,7 +334,13 @@ class Poker:
                     if len(self.sala_atual["jogadores"]) < 2:
                         pyxel.text(10, y_offset + 20, "Aguardando jogadores...", pyxel.COLOR_RED)
                     else:
-#                        pyxel.text(10, y_offset + 20, "A partida já vai iniciar!", pyxel.COLOR_GREEN)
+                        if self.cliente_socket.winner is not None:
+                            if self.cliente_socket.winner == 0:
+                                pyxel.text(20, 60, f"Empate!!", pyxel.COLOR_GREEN)
+                            else:
+                                pyxel.text(20, 60, f"O ganhador é o jogador {self.cliente_socket.winner}!", pyxel.COLOR_GREEN)
+                            
+
                         sala = self.cliente_socket.salas_disponiveis[self.sala_selecionada_index]
                         
                         if self.cliente_socket.sala_atual_info is not None and self.cliente_socket.sala_atual_info['rodada'] == 0:
@@ -325,7 +353,7 @@ class Poker:
                                             
                     
 
-    def draw_winner(self):
-        pass
+    
+        
 
 Poker()
