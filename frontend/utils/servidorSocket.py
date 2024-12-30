@@ -20,7 +20,7 @@ class ServidorSocket:
         self.sio.on('init_game',self.init_game)
 
 
-        self.sio.connect('http://localhost:4000')
+        self.sio.connect('https://poker-pyxel-a16f85e125a4.herokuapp.com')
 
     def init_game(self, data):
         print("recebemos dados! init game executada,: ", data)
