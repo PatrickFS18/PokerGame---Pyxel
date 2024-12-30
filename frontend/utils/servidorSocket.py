@@ -6,7 +6,7 @@ class ServidorSocket:
         self.salas_disponiveis = {}
         self.sala_selecionada = None
         # Registrando eventos
-        self.sala_atual = None
+        self.sala_atual_info = None
         self.id_player = None
         self.sid = None
         self.atualizar_sala = None
@@ -47,18 +47,15 @@ class ServidorSocket:
 
                 break
 
-
-
     def chamar_nova_rodada(self, sala_id):
         # Cliente envia pedido para o servidor iniciar nova rodada
-        self.sio.emit('nova_rodada', {'sala_id': sala_id})
+        self.sio.emit('nova_rodada',sala_id)
         print(f"Nova rodada solicitada para a sala {sala_id}")
 
     def handle_nova_rodada(self, data):
         # Salvar as informações recebidas na resposta do servidor
-        self.sala_atual = data  # Atualiza os dados da sala localmente
+        self.sala_atual_info = data  # Atualiza os dados da sala localmente
         print("Recebemos dados atualizados da rodada:")
-        print(data)
         
     def on_connect(self):
         print("Conectado ao servidor!")
