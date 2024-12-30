@@ -128,14 +128,15 @@ def ingressar_sala(sid, sala_id):
             sio.emit('erro_sala', {'mensagem': 'Sala cheia!'}, room=sid)
     else:
         sio.emit('erro_sala', {'mensagem': 'Sala inexistente!'}, room=sid)
+
 @sio.event
 def nova_rodada(sid, data):
     victory = Victory()
+    sala_id = str(data["sala_id"])  # Garantir consistência no tipo
+    id_player = data["id_player"]  # ID do jogador que solicitou a nova rodada
+    print(f'aqui chamou com sala_id: {sala_id} pelo jogador {id_player}')
     
-    sala_id = str(data)  # Garantir consistência no tipo
-    print('aqui chamou com sala_id:', sala_id)
     sala_encontrada = None
-    
     # Procurar pela sala correspondente no dicionário
     for id, sala in salas.items():
         if id == sala_id:
@@ -144,46 +145,38 @@ def nova_rodada(sid, data):
     
     if sala_encontrada:
         sala = sala_encontrada
-        if sala["rodada"] == 0:
-            pass
         
-        elif sala["rodada"] == 1:
-            pass
+        # Verificar se é a vez do jogador correspondente
+        rodada = sala["rodada"]
+        jogador_permitido = sala["jogadores"][0].id if rodada % 2 != 0 else sala["jogadores"][1].id
         
-        elif sala["rodada"] == 2:
-            pass 
-        
-        elif sala["rodada"] == 3:  # Verificar Vitória
-            # Define ganhador
-            sala["rodada"] = 0
-            pass  # teste
-        
-        dealer, jogador, adversario = None, None, None
-        
-        # Certifique-se de que há jogadores suficientes na sala
-        if len(sala["jogadores"]) >= 2:
-            jogador = sala["jogadores"][0]
-            adversario = sala["jogadores"][1]
-            dealer = sala["dealer"]
-
-        if jogador is not None and dealer is not None and adversario is not None:
-            victory.verifyLogic(dealer, jogador, adversario)
+        if id_player != jogador_permitido:
+            sio.emit('erro', {'mensagem': 'Não é a sua vez de jogar!'}, room=sid)
             
-        if victory.winner is not None:
-            sio.emit('vencedor', {'sala_id': sala_id, 'vencedor': victory.winner,'rodada':sala["rodada"]}, room=sala_id)
-        
-        if sala["rodada"] < 3:
-            sala["rodada"] += 1  # Avança para a próxima rodada
-            print(f"Rodada atualizada para: {sala['rodada']}")
-        
-            print('realmente aumentou a rodada')
-            sio.emit('nova_rodada', {'sala_id': sala_id, 'rodada': sala["rodada"]}, room=sala_id)
+            return
         else:
-            sio.emit('nova_rodada', {'sala_id': sala_id, 'rodada': sala["rodada"]}, room=sala_id)
             
+            if sala["rodada"] < 6:
+                sala["rodada"] += 1
+        # Atualizar a rodada
+            if sala["rodada"] == 6:
+            # VERIFICAR GANHADOR
+                if len(sala["jogadores"]) >= 2:
+                    jogador = sala["jogadores"][0]
+                    adversario = sala["jogadores"][1]
+                    dealer = sala["dealer"]
+                    if jogador is not None and dealer is not None and adversario is not None and sala["rodada"] == 6:
+                        victory.verifyLogic(dealer, jogador, adversario)
+                    if victory.winner is not None:
+                        sio.emit('vencedor', {'sala_id': sala_id, 'vencedor': victory.winner, 'rodada': sala["rodada"]}, room=sala_id)
+                    else:
+                        sio.emit('erro', {'mensagem': 'Sala inexistente!'}, room=sid)
+
+        sio.emit('nova_rodada', {'sala_id': sala_id, 'rodada': sala["rodada"]}, room=sala_id)
+        print(f"Rodada atualizada para: {sala['rodada']}")
     else:
         sio.emit('erro', {'mensagem': 'Sala inexistente!'}, room=sid)
-
+        
 @sio.event
 def salas_disponiveis(data):
     salas_info = []
