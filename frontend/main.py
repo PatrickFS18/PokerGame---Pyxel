@@ -11,6 +11,7 @@ class Poker:
         self.sala_id = None
         self.salas_list = None
         self.sala_atual = None
+        self.winner = None
         self.proxima_carta = False
         self.rodada_solicitada = False 
         self.position_cards = [ #(local x,local y, width, height, topox, topoy, centrox, centroy)
@@ -53,10 +54,15 @@ class Poker:
         self.verificar_ganhador = False
         self.state = "menu"
         self.selected_option = -1 #-1 = neutro
+        
+
+        
         self.chips = False
         #frontend
         pyxel.init(256,192, title= "Poker Game")
         
+        
+        self.setup_music()
         pyxel.mouse(True)
         self.mx = pyxel.mouse_x
         self.my = pyxel.mouse_y
@@ -64,11 +70,63 @@ class Poker:
         pyxel.load("my_resource.pyxres")
         pyxel.images[0]
         pyxel.run(self.update,self.draw)
+    
+    def setup_music(self):
+        pyxel.sounds[0].set(
+            "e2e2c2g1 g1g1c2e2 d2d2d2g2 g2g2rr c2c2a1e1 e1e1a1c2 b1b1b1e2 e2e2rr",
+            "p",
+            "6",
+            "vffn fnff vffs vfnn",
+            25,
+        )
+        pyxel.sounds[1].set(
+            "r a1b1c2 b1b1c2d2 g2g2g2g2 c2c2d2e2 f2f2f2e2 f2e2d2c2 d2d2d2d2 g2g2r r ",
+            "s",
+            "6",
+            "nnff vfff vvvv vfff svff vfff vvvv svnn",
+            25,
+        )
+        pyxel.sounds[2].set(
+            "c1g1c1g1 c1g1c1g1 b0g1b0g1 b0g1b0g1 a0e1a0e1 a0e1a0e1 g0d1g0d1 g0d1g0d1",
+            "t",
+            "7",
+            "n",
+            25,
+        )
+        pyxel.sounds[3].set(
+            "f0c1f0c1 g0d1g0d1 c1g1c1g1 a0e1a0e1 f0c1f0c1 f0c1f0c1 g0d1g0d1 g0d1g0d1",
+            "t",
+            "7",
+            "n",
+            25,
+        )
+        pyxel.sounds[4].set(
+            "f0ra4r f0ra4r f0ra4r f0f0a4r", "n", "6622 6622 6622 6422", "f", 25
+        )
+        self.play_music(True, True, True)
+
+    def play_music(self, ch0, ch1, ch2):
+        if ch0:
+            pyxel.play(0, [0, 1], loop=True)
+        else:
+            pyxel.stop(0)
+        if ch1:
+            pyxel.play(1, [2, 3], loop=True)
+        else:
+            pyxel.stop(1)
+        if ch2:
+            pyxel.play(2, 4, loop=True)
+        else:
+            pyxel.stop(2)
+
         
     def update(self):
         self.salas_list = self.cliente_socket.salas_disponiveis
         self.mx = pyxel.mouse_x
         self.my = pyxel.mouse_y
+        if pyxel.btnp(pyxel.KEY_M):
+            self.play_music(False, False, False)
+
         if self.state == "menu":
             self.update_menu()
 
@@ -184,12 +242,14 @@ class Poker:
             self.state = "winner"
         else:
             self.selected_option = -1
-  
+        if self.winner is not None:
+            self.state = "winner"
+            
     def update_winner(self):
         
         if self.cliente_socket.winner:
             self.winner = self.cliente_socket.winner
-
+        
         #talvez jogar novamente
        
 
@@ -204,6 +264,7 @@ class Poker:
         elif self.cliente_socket.sala_selecionada is not None and self.state == "online":
             self.draw_online()    
         elif self.state == "winner":
+            print('ok, entrou mesmo')
             self.draw_winner()
         
     def draw_cartas_dealer_e_jogador(self, sala_atual,rodada):
@@ -279,90 +340,127 @@ class Poker:
             # pyxel.text(10, 10, f"Sala {self.cliente_socket.sala_selecionada} - Jogadores:", pyxel.COLOR_WHITE)
 
     def draw_menu(self):
-        # Título do Jogo
-        pyxel.text(102, 20, "Poker Game", pyxel.frame_count %16)
+        pyxel.cls(0)  # Fundo preto
 
-        # Opção Jogo Online
-        color_online = 11 if self.selected_option == 1 else 7
-        pyxel.rect(98, 60, 60, 20, color_online)
-        pyxel.text(118, 67, "Jogar", 0)
+        # Fundo do menu com gradiente
+        for y in range(192):
+            pyxel.line(0, y, 256, y, pyxel.COLOR_NAVY if y % 2 == 0 else pyxel.COLOR_DARK_BLUE)
 
-        color_exit = 8 if self.selected_option == 2 else 7
-        pyxel.rect(98, 100, 60, 20, color_exit)
-        pyxel.text(120, 107, "Sair", 0)
+        # Título do jogo com efeito de brilho, centralizado
+        pyxel.text(107, 20, "POKER GAME", pyxel.frame_count % 16)
+
+        # Moldura decorativa para o menu, centralizada
+        pyxel.rectb(78, 50, 100, 100, pyxel.COLOR_YELLOW)
+        pyxel.rectb(76, 48, 104, 104, pyxel.COLOR_RED)
+
+        # Opções do menu com destaque para a selecionada
+        self.draw_menu_option("JOGAR", 98, 75, self.selected_option == 1)
+        self.draw_menu_option("SAIR", 98, 115, self.selected_option == 2)
+
+    def draw_menu_option(self, text, x, y, is_selected):
+        color_box = pyxel.COLOR_ORANGE if is_selected else pyxel.COLOR_GRAY
+        color_text = pyxel.COLOR_BLACK if is_selected else pyxel.COLOR_WHITE
+        pyxel.rect(x - 10, y - 5, 80, 20, color_box)  # Ajustado para centralizar
+        pyxel.text(x, y, text, color_text)
 
     def draw_rooms(self):
-        
-        
-        pyxel.text(10, 10, "Salas disponíveis:", pyxel.COLOR_WHITE)
+        # Fundo para a seção de salas
+        pyxel.rect(20, 10, 216, 150, pyxel.COLOR_NAVY)
+        pyxel.rectb(18, 8, 220, 154, pyxel.COLOR_YELLOW)
 
-        y_offset = 20
+        # Título centralizado
+        title_x = 256 // 2 - len("SALAS DISPONÍVEIS") * 2
+        pyxel.text(title_x, 15, "SALAS DISPONÍVEIS", pyxel.COLOR_WHITE)
+
+        # Exibição das salas
+        y_offset = 40
         for index, sala in enumerate(self.cliente_socket.salas_disponiveis):
             sala_id = sala.get("sala_id", "N/A")
             jogadores_str = ', '.join([f"Player {j['id']}" for j in sala.get("jogadores", [])])
-            
-            color = pyxel.COLOR_YELLOW if index == self.sala_selecionada_index else pyxel.COLOR_WHITE
-            pyxel.text(10, y_offset, f"Sala {sala_id}: {jogadores_str}", color)
-            y_offset += 10
 
-        #self.cliente_socket.sala_atual_info["rodada"]
+            # Destaque para a sala selecionada
+            is_selected = index == self.sala_selecionada_index
+            color = pyxel.COLOR_YELLOW if is_selected else pyxel.COLOR_WHITE
+            bg_color = pyxel.COLOR_DARK_BLUE if is_selected else pyxel.COLOR_DARK_BLUE
 
-        pyxel.text(30, y_offset + 30, "Pressione 'C' para criar uma sala", pyxel.COLOR_GREEN)
-        pyxel.text(30, y_offset + 40, "Setas: navegar | ENTER: ingressar", pyxel.COLOR_GREEN)
+            # Fundo do item e texto centralizado
+            pyxel.rect(30, y_offset - 2, 196, 14, bg_color)
+            text_x = 256 // 2 - len(f"Sala {sala_id}: {jogadores_str}") * 2
+            pyxel.text(text_x, y_offset, f"Sala {sala_id}: {jogadores_str}", color)
+
+            y_offset += 18
+
+        # Instruções centralizadas
+        instructions = [
+            "Pressione 'C' para criar uma sala",
+            "Setas: navegar | ENTER: ingressar"
+        ]
+        for i, text in enumerate(instructions):
+            instruction_x = 256 // 2 - len(text) * 2
+            pyxel.text(instruction_x, y_offset + (i * 10) + 10, text, pyxel.COLOR_GREEN)
 
     def draw_online(self):        
-    
         pyxel.cls(0)
         
         if (0 <= self.sala_selecionada_index < len(self.cliente_socket.salas_disponiveis)) and self.cliente_socket.salas_disponiveis[self.sala_selecionada_index] is not None:
             # Sala selecionada disponível e não nula
             
             # Pega a sala atual
-            
             sala = self.cliente_socket.salas_disponiveis[self.sala_selecionada_index]
             sala_id = sala["sala_id"]
             self.sala_atual = next((s for s in self.cliente_socket.salas_disponiveis if s.get("sala_id") == self.cliente_socket.sala_selecionada), None)
             
-            # Se tiver sala atuals
+            # Se tiver sala atual
             if self.sala_atual:
-                #Aqui deve desenhar o caso de só ter um jogador. Aguardando outro entrar
-                    
                 pyxel.text(10, 10, f"Sala {self.cliente_socket.sala_selecionada} - Jogadores:", pyxel.COLOR_WHITE)
                 y_offset = 20
+                
+                # Exibe o jogador atual
                 pyxel.text(10, 70, f"Player {self.cliente_socket.id_player}", pyxel.COLOR_RED)
 
-                # For para adicionar em uma string os jogadores na sala
+                # Adiciona os jogadores na sala em uma string
+                jogadores_str = ', '.join([f"Player {jogador['id']}" for jogador in self.sala_atual.get("jogadores", []) if isinstance(jogador, dict)])
+                if jogadores_str:
+                    pyxel.text(10, y_offset, jogadores_str, pyxel.COLOR_WHITE)
                 
-                for j in self.sala_atual.get("jogadores", []):
-                    if isinstance(j, dict) and j.get("id") == self.cliente_socket.id_player:
-                        jogadores_str = ', '.join([f"Player {jogador['id']}" for jogador in self.sala_atual.get("jogadores", [])])
-                        pyxel.text(10, y_offset, jogadores_str, pyxel.COLOR_WHITE)
-                
-                # Verifica quantidade de jogadores na sala
-                
+                # Verifica a quantidade de jogadores na sala
                 if len(self.sala_atual["jogadores"]) < 2:
                     pyxel.text(10, y_offset + 20, "Aguardando jogadores...", pyxel.COLOR_RED)
-                
-                # Se fechar a sala com os 2 jogadores, exibir a sala
+
                 else:
-                    
-                    # Se já tiver um vencedor, ou empate, exibe
-                    if self.cliente_socket.winner is not None:
-                        if self.cliente_socket.winner == 0:
-                            pyxel.text(20, 60, f"Empate!!", pyxel.COLOR_GREEN)
-                        else:
-                            pyxel.text(20, 60, f"O ganhador é o jogador {self.cliente_socket.winner}!", pyxel.COLOR_GREEN)
-                        
-                    # Exibir a mesa e cartas
-                    
+
                     sala = self.cliente_socket.salas_disponiveis[self.sala_selecionada_index]
                     
                     # Exibir cartas do dealer e do jogador com o ID atual
                     self.draw_cartas_dealer_e_jogador(self.sala_atual,self.rodada)
                                             
     
-    def draw_winner(self):                
-        #botar ganhador
-        pass
+    def draw_winner(self):
+        pyxel.cls(0)  # Limpa a tela
+        if self.winner is not None:
+            # Fundo colorido em transição
+            print('ok entrou')
+            pyxel.rect(0, 0, pyxel.width, pyxel.height, (pyxel.frame_count // 10) % 4)
+
+            # Texto com efeito de crescimento
+            scale = 1 + (pyxel.frame_count % 60) / 15
+            x = 40 - int(scale * 10)
+            y = 60 - int(scale * 10)
+            text = f"TEMOS UM VENCEDOR! Jogador {self.winner}!"
+            for i in range(len(text)):
+                pyxel.text(x + i * scale * 4, y, text[i], pyxel.frame_count % 4)
+            
+            # Adicionando sprites ou elementos temáticos
+            pyxel.text(50, 100, "🎉🎉🎉", pyxel.COLOR_YELLOW)
+            pyxel.text(30, 120, "Parabéns ao campeão!", pyxel.COLOR_GREEN)
+            
+            # Animação de confetes
+            for _ in range(20):
+                pyxel.pset(
+                    pyxel.rndi(0, pyxel.width - 1),
+                    pyxel.rndi(0, pyxel.height - 1),
+                    pyxel.rndi(1, 15),
+                )
+
 
 Poker()
