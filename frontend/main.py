@@ -50,7 +50,11 @@ class Poker:
                             "11" : ( 100,  208, 6, 15),
                             "12" : ( 106,  208, 7, 15),
                             "13" : ( 113,  208, 7, 15),
+                            "sua" : ( 8, 192, 79, 16),
+                            "venceu" : ( 88, 192, 159, 32),
+                            "perdeu" : ( 88, 224, 159,32)
                         } 
+        
         self.verificar_ganhador = False
         self.state = "menu"
         self.selected_option = -1 #-1 = neutro
@@ -69,6 +73,7 @@ class Poker:
         # Detecta se o cursor está sobre uma das opções
         pyxel.load("my_resource.pyxres")
         pyxel.images[0]
+        pyxel.images[1]
         pyxel.run(self.update,self.draw)
     
     def setup_music(self):
