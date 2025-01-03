@@ -1,6 +1,6 @@
 from utils.jogador import Jogador
 from utils.baralho import Baralho
-from utils.carta import Carta  # Certifique-se de importar a classe Carta
+from utils.carta import Carta
 
 class InitGame:
     def __init__(self):
@@ -24,18 +24,22 @@ class InitGame:
         return None
 
     def distribuir_cartas(self, sala, baralho):
-        jogadores = []  # Lista para armazenar os objetos Jogador
+         
+        # Lista para armazenar os objetos Jogador 
+        jogadores = [] 
         dealer = Jogador('dealer')
+        
         for player_id in sala:
             jogador = Jogador(player_id)
 
             # Distribuir 2 cartas únicas para o jogador
-            for _ in range(2):  # 2 cartas por jogador
-                if baralho:  # Verificar se ainda há cartas no baralho
+            for _ in range(2):
+                # Verificar se ainda há cartas no baralho
+                if baralho:  
                     carta_info = baralho.pop(0)
                     jogador.mao.append(carta_info if isinstance(carta_info, Carta) else Carta(carta_info))
             
-            jogadores.append(jogador)  # Adicionar o jogador à lista
+            jogadores.append(jogador)  
         
         # Distribuir 5 cartas para o dealer
         for _ in range(5):

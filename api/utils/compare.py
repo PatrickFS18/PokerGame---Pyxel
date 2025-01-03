@@ -1,4 +1,5 @@
 from collections import Counter
+
 class Compare:
     def __init__(self, player_hand, dealer_hand):
         self.player_hand = player_hand
@@ -8,15 +9,12 @@ class Compare:
         self.victory = [0] # Util para verificar a mao mais forte do jogador
         self.highest_hand_value = [[],[],[],[],[],[],[],[],[],[]] # Útil para ver qual é a mão mais forte para casos de mesma vitória
         self.high_card = 0
+        
     def game (self):
         for i in range(len(self.dealer_hand)):
             self.hand.append(self.dealer_hand[i])
         for i in range(len(self.player_hand)):
             self.hand.append(self.player_hand[i])
-        print('player',self.hand)
-        # print('dealer ',self.dealer_hand)
-        # print('mao ',self.hand)
-        
     
     def maior_valor_cartas(self,hand):
                     maior_valor = -1  # Inicializa com um valor pequeno
@@ -38,15 +36,13 @@ class Compare:
 
         if case == 2:
             self.hand.sort(key = lambda carta: (order_naipes[carta.naipe], carta.valor))
-            #self.hand = [{'valor': 7, 'naipe': 'Paus'}, {'valor': 9, 'naipe': 'Paus'}, {'valor': 10, 'naipe': 'Ouro'}, {'valor': 11, 'naipe': 'Ouro'}, {'valor': 12, 'naipe': 'Ouro'}, {'valor': 13, 'naipe': 'Ouro'}, {'valor': 14, 'naipe': 'Ouro'}]
-            #print(self.hand)
             carta_naipe = [carta.naipe for carta in self.hand]
             contador =  Counter(carta_naipe)
             self.common_naipe = contador.most_common(1)[0]
            
     def verify_straight(self,hand):
         sequencia = 1
-        #print(hand)
+        
         for i in range(1, len(hand)):
             if hand.valor[i] == hand.valor[i - 1] + 1:
                 sequencia += 1
@@ -74,19 +70,20 @@ class Compare:
             elif straight: # Straight Flush
                 self.victory.append(8)
                 for i in range(1, 6):  # Deve percorrer as 5 cartas do Straight Flush
-                    self.highest_hand_value[8].append(filtered_hand[i - 1].valor)  # Adiciona o valor das cartas
+                    self.highest_hand_value[8].append(filtered_hand[i - 1].valor)  
                 
             else: #flush
                 self.victory.append(5)
                 for i in range(1, 6):  # Deve percorrer as 5 cartas do Straight Flush
-                    self.highest_hand_value[5].append(filtered_hand[i - 1].valor)  # Adiciona o valor das cartas
+                    self.highest_hand_value[5].append(filtered_hand[i - 1].valor)  
+                    
     def straight(self):
         hand = self.order_cards(1)
         straight = self.verify_straight(hand) 
         if straight: # Straight
             self.victory.append(4)
             for i in range(1, 6):  # Deve percorrer as 5 cartas do Straight Flush
-                self.highest_hand_value[4].append(hand[i - 1].valor)  # Adiciona o valor das cartas
+                self.highest_hand_value[4].append(hand[i - 1].valor)  
             
     def high_cards(self):
         # Adicionar carta mais alta
@@ -109,7 +106,6 @@ class Compare:
             'Quadruplas': {valor: count for valor, count in contagem.items() if count == 4}
         }
         
-        #print('Count Equal Values ',resultado)
         if len(resultado['Pares']) > 0:
             quantityPairs = len(resultado['Pares'])
             
@@ -119,12 +115,12 @@ class Compare:
             if quantityPairs == 1:
                 self.victory.append(1)
                 print('Um par: ', resultado['Pares'])
-                self.highest_hand_value[1].append(resultado['Pares'])  # Adiciona o valor das cartas
+                self.highest_hand_value[1].append(resultado['Pares'])  
             
             elif quantityPairs == 2:
                 self.victory.append(2)
                 print('Dois pares: ', resultado['Pares'])
-                self.highest_hand_value[2].append(resultado['Pares'])  # Adiciona o valor das cartas
+                self.highest_hand_value[2].append(resultado['Pares'])  
             
             else:  # Mais de 2 pares
                 self.victory.append(2)
@@ -138,7 +134,6 @@ class Compare:
                 print('Dois maiores pares selecionados: ', maiores_pares)
                 
                 self.highest_hand_value[2].append(maiores_pares)  # Adiciona os dois maiores pares
-
                     
         if len(resultado['Triplas']) > 0:
             triplas = resultado['Triplas']
@@ -153,14 +148,14 @@ class Compare:
                 del triplas[menor_chave]
                 
             self.victory.append(3)
-            self.highest_hand_value[3].append(triplas)  # Adiciona o valor das cartas
+            self.highest_hand_value[3].append(triplas)  
 
             print('Triplas: ',resultado['Triplas'])
             
         if len(resultado['Quadruplas']) > 0:
             self.victory.append(7)
             quadruplas = resultado['Quadruplas']
-            self.highest_hand_value[7].append(quadruplas)  # Adiciona o valor das cartas
+            self.highest_hand_value[7].append(quadruplas)  
 
             print('Quadruplas: ',resultado['Quadruplas'])
             
@@ -171,6 +166,4 @@ class Compare:
             self.highest_hand_value[6] = [trinca, par]
             print(f"Full House: Trinca {trinca} e Par {par}")
             return  # Retorna pois o Full House é mais forte que trincas ou pares isolados
-            
-            #paramos na  implementacao dos tres tips de flushs nessa def
             
