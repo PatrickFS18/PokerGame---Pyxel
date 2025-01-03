@@ -108,7 +108,7 @@ class Poker:
         pyxel.sounds[4].set(
             "f0ra4r f0ra4r f0ra4r f0f0a4r", "n", "6622 6622 6622 6422", "f", 25
         )
-        self.play_music(True, True, True)
+        self.play_music(False, False, False)
 
     def play_music(self, ch0, ch1, ch2):
         if ch0:
@@ -457,7 +457,7 @@ class Poker:
             
             # Adicionando sprites ou elementos temáticos
             pyxel.text(50, 100, "🎉🎉🎉", pyxel.COLOR_YELLOW)
-            pyxel.text(30, 120, "Parabéns ao campeão!", pyxel.COLOR_GREEN)
+            pyxel.text(30, 120, "Parabens ao campeao!", pyxel.COLOR_GREEN)
             
             # Animação de confetes
             for _ in range(20):
