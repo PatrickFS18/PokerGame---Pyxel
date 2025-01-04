@@ -224,6 +224,7 @@ class Poker:
                         if self.cliente_socket.sala_atual_info is not None and self.cliente_socket.sala_atual_info["rodada"] == 6:
 
                             self.verificar_ganhador = True
+                            self.state = "winner"
                         else:
                             self.cliente_socket.chamar_nova_rodada(sala_id,self.cliente_socket.id_player) # Chama novo turno também. verificação na API por quem solicitou
 
@@ -240,13 +241,12 @@ class Poker:
                 self.selected_option = 0
                 if self.cliente_socket.sala_atual_info is not None and self.cliente_socket.sala_atual_info["rodada"] == 6:
                     self.verificar_ganhador = True
+                    self.state = "winner"
                 else:
                     self.cliente_socket.chamar_nova_rodada(sala_id,self.cliente_socket.id_player) # Chama novo turno também. verificação na API por quem solicitou
 
 
-        elif self.verificar_ganhador == True:
-            self.state = "winner"
-        else:
+        elif self.verificar_ganhador != True:
             self.selected_option = -1
         if self.winner is not None:
             self.state = "winner"
@@ -270,14 +270,17 @@ class Poker:
         elif self.cliente_socket.sala_selecionada is not None and self.state == "online":
             self.draw_online()
         elif self.state == "winner":
-            print('ok, entrou mesmo')
             self.draw_winner()
 
     def draw_cartas_dealer_e_jogador(self, sala_atual,rodada):
 
         if self.cliente_socket.sala_atual_info is not None:
             self.rodada = self.cliente_socket.sala_atual_info["rodada"]
+            print('entrou aqui aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ',self.rodada)
+            
             rodada = int(self.rodada)
+            if rodada == 6:
+                self.state = 'winner'
         pyxel.blt(0, 0, 0, 0, 0, 256, 192)
         jogador_mao = None
         dealer_mao = None
@@ -447,7 +450,6 @@ class Poker:
 
 
     def draw_winner(self):
-        pyxel.cls(0)  # Limpa a tela
         p_venceu = self.position_itens["Venceu"]
         p_perdeu = self.position_itens["Perdeu"]
         p_empate = self.position_itens["Empate"]
@@ -457,27 +459,44 @@ class Poker:
                 jogadores.append(j.get("id"))
 
         if self.winner is not None and len(jogadores) == 2:
+            
+            print(self.cliente_socket.winner)
 
             if self.winner == 0:
-                pyxel.blt(48, 80, 1, p_perdeu[0], p_perdeu[1], p_perdeu[2], p_perdeu[3])
-                pyxel.text(52, 136, "SUA foi tAL", pyxel.COLOR_BLACK)
-                pyxel.text(52, 136, 'jogada do adversario' , pyxel.COLOR_BLACK)
+                pyxel.blt(48, 80, 1, p_empate[0],p_empate[1],p_empate[2],p_empate[3])
+                pyxel.text(52, 136, self.cliente_socket.jogadas[0][self.cliente_socket.id_player], pyxel.COLOR_BLACK)
+                pyxel.text(52, 136,"Empate!", pyxel.COLOR_BLACK)
                 pass
             #empate ajustar mostrar a jogada de ambos
+            # Iterar sobre as jogadas e encontrar a jogada do id_player correspondente
+            for jogada in self.cliente_socket.jogadas:
+                if str(self.cliente_socket.id_player) in jogada:
+                    jogada_atual = jogada[str(self.cliente_socket.id_player)]
+                    print('jogada atual: ',jogada_atual)
+                    break
+            else:
+                jogada_atual = "Jogada não encontrada"
+                print('jogada atual')
+
+            # Renderizar o resultado baseado na jogada
             if jogadores[0] == self.cliente_socket.id_player and self.cliente_socket.id_player == self.winner:
                 pyxel.blt(48, 80, 1, p_venceu[0], p_venceu[1], p_venceu[2], p_venceu[3])
-                pyxel.rectb(48,120, 159, 20, pyxel.COLOR_WHITE)
-                pyxel.text(52, 136, "SUA foi tAL", pyxel.COLOR_BLACK)
+                pyxel.rectb(48, 120, 159, 20, pyxel.COLOR_WHITE)
+                pyxel.text(52, 136, jogada_atual, pyxel.COLOR_BLACK)
+                print(jogada_atual)
 
-            if jogadores[1] == self.cliente_socket.id_player and self.cliente_socket.id_player == self.winner:
+            elif jogadores[1] == self.cliente_socket.id_player and self.cliente_socket.id_player == self.winner:
                 pyxel.blt(48, 80, 1, p_venceu[0], p_venceu[1], p_venceu[2], p_venceu[3])
-                pyxel.rectb(48,120, 159, 20, pyxel.COLOR_WHITE)
-                pyxel.text(52, 136, "SUA foi tAL", pyxel.COLOR_BLACK)
+                pyxel.rectb(48, 120, 159, 20, pyxel.COLOR_WHITE)
+                pyxel.text(52, 136, jogada_atual, pyxel.COLOR_BLACK)
+                print(jogada_atual)
+
             else:
                 pyxel.blt(48, 80, 1, p_perdeu[0], p_perdeu[1], p_perdeu[2], p_perdeu[3])
-                pyxel.rectb(48,120, 159, 40, pyxel.COLOR_WHITE)
-                pyxel.text(52, 136, "SUA foi tAL", pyxel.COLOR_BLACK)
-                pyxel.text(52, 136, 'jogada do adversario' , pyxel.COLOR_BLACK)
+                pyxel.rectb(48, 120, 159, 40, pyxel.COLOR_WHITE)
+                pyxel.text(52, 136, jogada_atual, pyxel.COLOR_BLACK)
+                print(jogada_atual)
+
             # Animação de confetes
             # for _ in range(20):
             #     pyxel.pset(

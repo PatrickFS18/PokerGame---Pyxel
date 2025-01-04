@@ -8,6 +8,8 @@ class Compare:
         self.victory = [0] # Util para verificar a mao mais forte do jogador
         self.highest_hand_value = [[],[],[],[],[],[],[],[],[],[]] # Útil para ver qual é a mão mais forte para casos de mesma vitória
         self.high_card = 0
+        self.jogada = None
+        
     def game (self):
         for i in range(len(self.dealer_hand)):
             self.hand.append(self.dealer_hand[i])
@@ -17,7 +19,22 @@ class Compare:
         # print('dealer ',self.dealer_hand)
         # print('mao ',self.hand)
         
-    
+    def determinar_jogada(self):
+        victory_to_text = {
+            9: "Royal Flush",
+            8: "Straight Flush",
+            7: "Four of a Kind",
+            6: "Full House",
+            5: "Flush",
+            4: "Straight",
+            3: "Three of a Kind",
+            2: "Two Pairs",
+            1: "One Pair",
+            0: "High Card"
+        }
+        melhor_jogada = max(self.victory)        
+        self.jogada = victory_to_text[melhor_jogada]
+
     def maior_valor_cartas(self,hand):
                     maior_valor = -1  # Inicializa com um valor pequeno
                     for jogada in hand:

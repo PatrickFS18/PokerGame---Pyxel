@@ -53,7 +53,9 @@ class ServidorSocket:
 
     def vencedor(self,data):
         self.winner = data["vencedor"]
+        self.jogadas = data["jogadas"]
         print('temos um vencedor! ',self.winner)
+        print('Jogadas: ',self.jogadas)
         
     def chamar_nova_rodada(self, sala_id, id_player):
         # Cliente envia pedido para o servidor iniciar nova rodada

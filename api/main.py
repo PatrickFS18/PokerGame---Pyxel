@@ -168,7 +168,7 @@ def nova_rodada(sid, data):
                     if jogador is not None and dealer is not None and adversario is not None and sala["rodada"] == 6:
                         victory.verifyLogic(dealer, jogador, adversario)
                     if victory.winner is not None:
-                        sio.emit('vencedor', {'sala_id': sala_id, 'vencedor': victory.winner, 'rodada': sala["rodada"]}, room=sala_id)
+                        sio.emit('vencedor', {'sala_id': sala_id, 'vencedor': victory.winner, 'rodada': sala["rodada"], 'jogadas': victory.jogadas}, room=sala_id)
                     else:
                         sio.emit('erro', {'mensagem': 'Sala inexistente!'}, room=sid)
 
