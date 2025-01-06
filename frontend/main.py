@@ -50,10 +50,10 @@ class Poker:
                             "11" : ( 100,  208, 6, 15),
                             "12" : ( 106,  208, 7, 15),
                             "13" : ( 113,  208, 7, 15),
-                            "Sua" : ( 8, 192, 79, 16),
-                            "Venceu" : ( 88, 192, 159, 32),
-                            "Perdeu" : ( 88, 224, 159,32),
-                            "Empate" : ()
+                            "Sua" : ( 8, 192, 80, 16),
+                            "Venceu" : ( 88, 192, 160, 32),
+                            "Perdeu" : ( 88, 224, 160,32),
+                            "Empate" : (88,152,150,32)
                         }
 
         self.verificar_ganhador = False
@@ -463,7 +463,8 @@ class Poker:
             print(self.cliente_socket.winner)
 
             if self.winner == 0:
-                pyxel.blt(48, 80, 1, p_empate[0],p_empate[1],p_empate[2],p_empate[3])
+                pyxel.cls(11)#FUNDO VERDE 
+                pyxel.blt(52, 80, 1, p_empate[0],p_empate[1],p_empate[2],p_empate[3])
                 pyxel.text(52, 136, self.cliente_socket.jogadas[0][self.cliente_socket.id_player], pyxel.COLOR_BLACK)
                 pyxel.text(52, 136,"Empate!", pyxel.COLOR_BLACK)
                 pass
@@ -480,29 +481,29 @@ class Poker:
 
             # Renderizar o resultado baseado na jogada
             if jogadores[0] == self.cliente_socket.id_player and self.cliente_socket.id_player == self.winner:
+                pyxel.cls(11)
                 pyxel.blt(48, 80, 1, p_venceu[0], p_venceu[1], p_venceu[2], p_venceu[3])
-                pyxel.rectb(48, 120, 159, 20, pyxel.COLOR_WHITE)
-                pyxel.text(52, 136, jogada_atual, pyxel.COLOR_BLACK)
+                pyxel.text(52, 136, jogada_atual, pyxel.COLOR_WHITE)
                 print(jogada_atual)
 
+                # Animação de confetes
+                #for _ in range(20):
+                #    pyxel.pset(
+                #        pyxel.rndi(0, pyxel.width - 1),
+                #        pyxel.rndi(0, pyxel.height - 1),
+                #        pyxel.rndi(1, 15),
+                #    )
+
             elif jogadores[1] == self.cliente_socket.id_player and self.cliente_socket.id_player == self.winner:
+                pyxel.cls(11) #FUNDO VERDE 
                 pyxel.blt(48, 80, 1, p_venceu[0], p_venceu[1], p_venceu[2], p_venceu[3])
-                pyxel.rectb(48, 120, 159, 20, pyxel.COLOR_WHITE)
-                pyxel.text(52, 136, jogada_atual, pyxel.COLOR_BLACK)
+                pyxel.text(52, 136, jogada_atual, pyxel.COLOR_WHITE)
                 print(jogada_atual)
 
             else:
+                pyxel.cls(11) #FUNDO VERDE 
                 pyxel.blt(48, 80, 1, p_perdeu[0], p_perdeu[1], p_perdeu[2], p_perdeu[3])
-                pyxel.rectb(48, 120, 159, 40, pyxel.COLOR_WHITE)
-                pyxel.text(52, 136, jogada_atual, pyxel.COLOR_BLACK)
+                pyxel.text(52, 136, jogada_atual, pyxel.COLOR_WHITE)
                 print(jogada_atual)
-
-            # Animação de confetes
-            # for _ in range(20):
-            #     pyxel.pset(
-            #         pyxel.rndi(0, pyxel.width - 1),
-            #         pyxel.rndi(0, pyxel.height - 1),
-            #         pyxel.rndi(1, 15),
-            #     )
-       
+    
 Poker()
