@@ -450,52 +450,54 @@ class Poker:
 
 
     def draw_winner(self):
+        pyxel.cls(11)
         p_venceu = self.position_itens["Venceu"]
         p_perdeu = self.position_itens["Perdeu"]
         p_empate = self.position_itens["Empate"]
-        jogadores = []
-        for j in self.sala_atual.get("jogadores", []):
-            if isinstance(j, dict):
-                jogadores.append(j.get("id"))
+        jogadores = self.sala_atual.get("jogadores", [])
+        jogadas = self.cliente_socket.jogadas
 
         if self.winner is not None and len(jogadores) == 2:
-            
-            print(self.cliente_socket.winner)
+            id_player = self.cliente_socket.id_player
+            adversario_id = next(j["id"] for j in jogadores if j["id"] != id_player)
+            jogador_mao = next(j["mao"] for j in jogadores if j["id"] == id_player)
+            adversario_mao = next(j["mao"] for j in jogadores if j["id"] == adversario_id)
+            dealer_mao = self.sala_atual["dealer"]
+            # Converter a mão em texto organizado
+            def formatar_mao(mao):
+                return ", ".join([f"{carta['valor']} de {carta['naipe']}" for carta in mao])
 
-            if self.winner == 0:
-                pyxel.blt(48, 80, 1, p_empate[0],p_empate[1],p_empate[2],p_empate[3])
-                pyxel.text(52, 136, self.cliente_socket.jogadas[0][self.cliente_socket.id_player], pyxel.COLOR_BLACK)
-                pyxel.text(52, 136,"Empate!", pyxel.COLOR_BLACK)
-                pass
-            #empate ajustar mostrar a jogada de ambos
-            # Iterar sobre as jogadas e encontrar a jogada do id_player correspondente
-            for jogada in self.cliente_socket.jogadas:
-                if str(self.cliente_socket.id_player) in jogada:
-                    jogada_atual = jogada[str(self.cliente_socket.id_player)]
-                    print('jogada atual: ',jogada_atual)
-                    break
-            else:
-                jogada_atual = "Jogada não encontrada"
-                print('jogada atual')
+            jogador_mao_formatada = formatar_mao(jogador_mao)
+            adversario_mao_formatada = formatar_mao(adversario_mao)
+            dealer_mao_formatada =formatar_mao(dealer_mao["mao"])
+            # Iterar sobre as jogadas para encontrar as jogadas correspondentes
+            jogada_atual = next((j[str(id_player)] for j in jogadas if str(id_player) in j), "Jogada não encontrada")
+            jogada_adversario = next((j[str(adversario_id)] for j in jogadas if str(adversario_id) in j), "Jogada não encontrada")
+            print(dealer_mao_formatada)
+            # Determina a mensagem de resultado e exibe gráficos e textos
+            if self.winner == 0:  # Empate
+                print(self.winner)
+                pyxel.blt(48, 80, 1, p_empate[0], p_empate[1], p_empate[2], p_empate[3])
+                pyxel.text(52, 100, "Empate!", pyxel.COLOR_WHITE)
+                pyxel.text(52, 120, f"Sua mao: {jogador_mao_formatada}", pyxel.COLOR_WHITE)
+                pyxel.text(52, 130, f"Mao do adversario: {adversario_mao_formatada}", pyxel.COLOR_RED)
+                pyxel.text(52, 150, f"Sua jogada: {jogada_atual}", pyxel.COLOR_DARK_BLUE)
+                pyxel.text(52, 160, f"Jogada do adversario: {jogada_adversario}", pyxel.COLOR_RED)
 
-            # Renderizar o resultado baseado na jogada
-            if jogadores[0] == self.cliente_socket.id_player and self.cliente_socket.id_player == self.winner:
+            elif id_player == self.winner:  # Vitória
                 pyxel.blt(48, 80, 1, p_venceu[0], p_venceu[1], p_venceu[2], p_venceu[3])
-                pyxel.rectb(48, 120, 159, 20, pyxel.COLOR_WHITE)
-                pyxel.text(52, 136, jogada_atual, pyxel.COLOR_BLACK)
-                print(jogada_atual)
+                pyxel.text(52, 120, f"Sua mao era: {jogador_mao_formatada}", pyxel.COLOR_DARK_BLUE)
+                pyxel.text(52, 130, f"Do adversario era: {adversario_mao_formatada}", pyxel.COLOR_RED)
+                pyxel.text(52, 150, f"Sua jogada: {jogada_atual}", pyxel.COLOR_DARK_BLUE)
+                pyxel.text(52, 160, f"Jogada do adversario: {jogada_adversario}", pyxel.COLOR_RED)
 
-            elif jogadores[1] == self.cliente_socket.id_player and self.cliente_socket.id_player == self.winner:
-                pyxel.blt(48, 80, 1, p_venceu[0], p_venceu[1], p_venceu[2], p_venceu[3])
-                pyxel.rectb(48, 120, 159, 20, pyxel.COLOR_WHITE)
-                pyxel.text(52, 136, jogada_atual, pyxel.COLOR_BLACK)
-                print(jogada_atual)
-
-            else:
+            else:  # Derrota
                 pyxel.blt(48, 80, 1, p_perdeu[0], p_perdeu[1], p_perdeu[2], p_perdeu[3])
-                pyxel.rectb(48, 120, 159, 40, pyxel.COLOR_WHITE)
-                pyxel.text(52, 136, jogada_atual, pyxel.COLOR_BLACK)
-                print(jogada_atual)
+                pyxel.text(52, 120, f"Sua mao era: {jogador_mao_formatada}", pyxel.COLOR_DARK_BLUE)
+                pyxel.text(52, 130, f"Do adversario era: {adversario_mao_formatada}", pyxel.COLOR_RED)
+                pyxel.text(52, 150, f"Sua jogada: {jogada_atual}", pyxel.COLOR_DARK_BLUE)
+                pyxel.text(52, 160, f"Jogada do adversario: {jogada_adversario}", pyxel.COLOR_RED)
+
 
             # Animação de confetes
             # for _ in range(20):
