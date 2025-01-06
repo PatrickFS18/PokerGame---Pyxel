@@ -1,7 +1,7 @@
 import pyxel
 from collections import Counter
 from utils.servidorSocket import ServidorSocket
-# Conectando ao servidor
+
 
 class Poker:
     def __init__(self):
@@ -77,6 +77,7 @@ class Poker:
         pyxel.images[1]
         pyxel.run(self.update,self.draw)
 
+    ### SONS PRONTOS DA COMUNIDADE DA PYXEL       
     def setup_music(self):
         pyxel.sounds[0].set(
             "e2e2c2g1 g1g1c2e2 d2d2d2g2 g2g2rr c2c2a1e1 e1e1a1c2 b1b1b1e2 e2e2rr",
@@ -109,7 +110,8 @@ class Poker:
         pyxel.sounds[4].set(
             "f0ra4r f0ra4r f0ra4r f0f0a4r", "n", "6622 6622 6622 6422", "f", 25
         )
-        self.play_music(False, False, False)
+        self.play_music(True, True, True)
+
 
     def play_music(self, ch0, ch1, ch2):
         if ch0:
@@ -125,7 +127,7 @@ class Poker:
         else:
             pyxel.stop(2)
 
-
+    # Parte inicial do frontend 
     def update(self):
         self.salas_list = self.cliente_socket.salas_disponiveis
         self.mx = pyxel.mouse_x
@@ -157,7 +159,7 @@ class Poker:
                 self.selected_option = 0
                 self.state = "rooms"
 
-                print("Iniciando Jogo Local")
+                #print("Iniciando Jogo Local")
 
         elif rect_exit[0] <= self.mx <= rect_exit[2] and rect_exit[1] <= self.my <= rect_exit[3]:
             self.selected_option = 2
@@ -189,29 +191,19 @@ class Poker:
 
         ####### JOGO ###########
 
-        b_desistir = (98,120,138,140) #x1,y1,x2,y2    selected_option = 3
         b_apostar = (145,120,185,140) #x1,y1,x2,y2      selected_option = 4
         b_passar = (192,120,232,140) #x1,y1,x2,y2    selected_option = 5
 
-        ## OPACIDADE DO BOTAO DESISTIR
-        if b_desistir[0] <= self.mx <= b_desistir[2] and b_desistir[1] <= self.my <= b_desistir[3]:
-            self.selected_option = 3
-            if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
-                self.selected_option = 0
-                #self.desistiu
-                pass
-
         #OPACIDADE DO BOTAO APOSTAR
-        elif b_apostar [0] <= self.mx <= b_apostar [2] and b_apostar [1] <= self.my <= b_apostar [3]:
+        if b_apostar [0] <= self.mx <= b_apostar [2] and b_apostar [1] <= self.my <= b_apostar [3]:
             self.selected_option = 4
             if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
                 # LOGICA DE UM BOTAO.
                 if self.chips:
                     self.chips = False
-
                 else:
                     self.chips = True
-                    pass
+
         #SE TU APOSTAR TU CAI NISSO
         elif self.chips:
             # BUTOES DAS FICHAS, PS: N MEXE NISSO Q TTA DIREITIN
@@ -276,11 +268,11 @@ class Poker:
 
         if self.cliente_socket.sala_atual_info is not None:
             self.rodada = self.cliente_socket.sala_atual_info["rodada"]
-            print('entrou aqui aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ',self.rodada)
+            #print("entrou aqui aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ",self.rodada)
             
             rodada = int(self.rodada)
             if rodada == 6:
-                self.state = 'winner'
+                self.state = "winner"
         pyxel.blt(0, 0, 0, 0, 0, 256, 192)
         jogador_mao = None
         dealer_mao = None
@@ -292,18 +284,18 @@ class Poker:
                 jogadores.append(j.get("id"))
             if isinstance(j, dict) and j.get("id") == self.cliente_socket.id_player:
                 jogador_mao = j["mao"]
-            if 'dealer' in sala_atual:
+            if "dealer" in sala_atual:
                 dealer_mao = sala_atual["dealer"]["mao"]
 
         if jogador_mao and dealer_mao is not None:
             for i in range(5):
                 p_carta = self.position_cards[i]
                 #carta
-                pyxel.blt(p_carta[0], p_carta[1], 0, self.position_itens['Verso'][0], self.position_itens['Verso'][1], 36, 52)
+                pyxel.blt(p_carta[0], p_carta[1], 0, self.position_itens["Verso"][0], self.position_itens["Verso"][1], 36, 52)
 
             for i in range(len(dealer_mao)): # Lógica para contar a partir da terceira carta
                 if(i <= rodada // 2 + 2):
-                    p_valor = self.position_itens[f'{dealer_mao[i]["valor"]}']
+                    p_valor = self.position_itens[f"{dealer_mao[i]["valor"]}"]
                     p_naipe = self.position_itens[dealer_mao[i]["naipe"]]
                     p_carta = self.position_cards[i]
                     #(local x,local y, width, height, topox, topoy, centrox, centroy)
@@ -311,28 +303,25 @@ class Poker:
                     #(x plot, y plot, imagem, x imagem, y imagem, comprimento, altura)
 
                     #carta
-                    pyxel.blt(p_carta[0], p_carta[1], 0, self.position_itens['Carta'][0], self.position_itens['Carta'][1], 36, 52)
+                    pyxel.blt(p_carta[0], p_carta[1], 0, self.position_itens["Carta"][0], self.position_itens["Carta"][1], 36, 52)
                     #numero topo
                     pyxel.blt(p_carta[4], p_carta[5], 0, p_valor[0], p_valor[1], p_valor[2], p_valor[3])
                     #naipe centro
                     pyxel.blt(p_carta[6], p_carta[7], 0, p_naipe[0], p_naipe[1], p_naipe[2], p_naipe[3])
 
             for i in range(len(jogador_mao)):
-                p_valor = self.position_itens[f'{jogador_mao[i]["valor"]}']
+                p_valor = self.position_itens[f"{jogador_mao[i]["valor"]}"]
                 p_naipe = self.position_itens[jogador_mao[i]["naipe"]]
                 p_carta = self.position_cards[i+5]
 
                 #carta
-                pyxel.blt(p_carta[0], p_carta[1], 0, self.position_itens['Carta'][0], self.position_itens['Carta'][1], 36, 52)
+                pyxel.blt(p_carta[0], p_carta[1], 0, self.position_itens["Carta"][0], self.position_itens["Carta"][1], 36, 52)
                 #numero topo
                 pyxel.blt(p_carta[4], p_carta[5], 0, p_valor[0], p_valor[1], p_valor[2], p_valor[3])
                 #naipe centro
                 pyxel.blt(p_carta[6], p_carta[7], 0, p_naipe[0], p_naipe[1], p_naipe[2], p_naipe[3])
 
-        color_desistir = 8 if self.selected_option == 3 else 7
-        pyxel.rect(98, 120, 40, 20, color_desistir)
-        pyxel.text(102, 127, "Desistir", 0)
-
+       
         color_apostar = 5 if self.selected_option == 4 else 7
         pyxel.rect(145, 120, 40, 20, color_apostar)
         pyxel.text(151, 127, "Apostar", 0)
@@ -345,7 +334,7 @@ class Poker:
             for L in self.position_chips:
                 # local x, local y, comprimento, altura, x1, y1, x2,y2
                 pyxel.blt(L[4], L[5], 0, L[0], L[1], 24,24)
-        print(jogadores)
+        #print(jogadores)
         if len(jogadores) == 2: 
             p_sua = self.position_itens["Sua"]
             if jogadores[0] == self.cliente_socket.id_player and rodada % 2 != 0 :
@@ -390,7 +379,7 @@ class Poker:
         y_offset = 40
         for index, sala in enumerate(self.cliente_socket.salas_disponiveis):
             sala_id = sala.get("sala_id", "N/A")
-            jogadores_str = ', '.join([f"Player {j['id']}" for j in sala.get("jogadores", [])])
+            jogadores_str = ", ".join([f"Player {j["id"]}" for j in sala.get("jogadores", [])])
 
             # Destaque para a sala selecionada
             is_selected = index == self.sala_selecionada_index
@@ -433,7 +422,7 @@ class Poker:
                 pyxel.text(10, 70, f"Player {self.cliente_socket.id_player}", pyxel.COLOR_RED)
 
                 # Adiciona os jogadores na sala em uma string
-                jogadores_str = ', '.join([f"Player {jogador['id']}" for jogador in self.sala_atual.get("jogadores", []) if isinstance(jogador, dict)])
+                jogadores_str = ", ".join([f"Player {jogador["id"]}" for jogador in self.sala_atual.get("jogadores", []) if isinstance(jogador, dict)])
                 if jogadores_str:
                     pyxel.text(10, y_offset, jogadores_str, pyxel.COLOR_WHITE)
 
@@ -465,7 +454,7 @@ class Poker:
             dealer_mao = self.sala_atual["dealer"]
             # Converter a mão em texto organizado
             def formatar_mao(mao):
-                return ", ".join([f"{carta['valor']} de {carta['naipe']}" for carta in mao])
+                return ", ".join([f"{carta["valor"]} de {carta["naipe"]}" for carta in mao])
 
             jogador_mao_formatada = formatar_mao(jogador_mao)
             adversario_mao_formatada = formatar_mao(adversario_mao)
@@ -473,10 +462,10 @@ class Poker:
             # Iterar sobre as jogadas para encontrar as jogadas correspondentes
             jogada_atual = next((j[str(id_player)] for j in jogadas if str(id_player) in j), "Jogada não encontrada")
             jogada_adversario = next((j[str(adversario_id)] for j in jogadas if str(adversario_id) in j), "Jogada não encontrada")
-            print(dealer_mao_formatada)
+            #print(dealer_mao_formatada)
             # Determina a mensagem de resultado e exibe gráficos e textos
             if self.winner == 0:  # Empate
-                print(self.winner)
+                #print(self.winner)
                 pyxel.blt(53, 80, 1, p_empate[0], p_empate[1], p_empate[2], p_empate[3])
                 pyxel.text(52, 100, "Empate!", pyxel.COLOR_WHITE)
                 pyxel.text(52, 120, f"Sua mao: {jogador_mao_formatada}", pyxel.COLOR_WHITE)
@@ -498,13 +487,4 @@ class Poker:
                 pyxel.text(52, 150, f"Sua jogada: {jogada_atual}", pyxel.COLOR_DARK_BLUE)
                 pyxel.text(52, 160, f"Jogada do adversario: {jogada_adversario}", pyxel.COLOR_RED)
 
-
-            # Animação de confetes
-            # for _ in range(20):
-            #     pyxel.pset(
-            #         pyxel.rndi(0, pyxel.width - 1),
-            #         pyxel.rndi(0, pyxel.height - 1),
-            #         pyxel.rndi(1, 15),
-            #     )
-       
 Poker()
