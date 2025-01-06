@@ -8,6 +8,8 @@ class Compare:
         self.victory = [0] # Util para verificar a mao mais forte do jogador
         self.highest_hand_value = [[],[],[],[],[],[],[],[],[],[]] # Útil para ver qual é a mão mais forte para casos de mesma vitória
         self.high_card = 0
+        self.jogada = None
+        
     def game (self):
         for i in range(len(self.dealer_hand)):
             self.hand.append(self.dealer_hand[i])
@@ -17,7 +19,22 @@ class Compare:
         # print('dealer ',self.dealer_hand)
         # print('mao ',self.hand)
         
-    
+    def determinar_jogada(self):
+        victory_to_text = {
+            9: "Royal Flush",
+            8: "Straight Flush",
+            7: "Four of a Kind",
+            6: "Full House",
+            5: "Flush",
+            4: "Straight",
+            3: "Three of a Kind",
+            2: "Two Pairs",
+            1: "One Pair",
+            0: "High Card"
+        }
+        melhor_jogada = max(self.victory)        
+        self.jogada = victory_to_text[melhor_jogada]
+
     def maior_valor_cartas(self,hand):
                     maior_valor = -1  # Inicializa com um valor pequeno
                     for jogada in hand:
@@ -43,50 +60,55 @@ class Compare:
             carta_naipe = [carta.naipe for carta in self.hand]
             contador =  Counter(carta_naipe)
             self.common_naipe = contador.most_common(1)[0]
+            print('COMMONNNN NAIPPEEEE ',self.common_naipe)
            
-    def verify_straight(self,hand):
+    def verify_straight(self, hand):
         sequencia = 1
-        #print(hand)
-        for i in range(1, len(hand)):
-            if hand.valor[i] == hand.valor[i - 1] + 1:
+        # Obter os valores das cartas
+        valores = sorted([carta.valor for carta in hand])
+
+        for i in range(1, len(valores)):
+            if valores[i] == valores[i - 1] + 1:
                 sequencia += 1
                 if sequencia == 5:
-                    return True  # Straight flush
+                    return True  # Straight encontrado
             else:
-                sequencia = 1 
-        
-        # Verificar caso especial do Ás baixo (A-2-3-4-5)
-        if set([14, 2, 3, 4, 5]).issubset(set(hand.valor)):
+                sequencia = 1
+
+        # Caso especial A-2-3-4-5
+        if set([1, 2, 3, 4, 5]).issubset(set(valores)):
             return True
-        return False 
+
+        return False
 
     def flush(self):
         self.order_cards(2)
         if self.common_naipe >= 5:
-            # Filtrar hand ppelo common naipe
-            hand = self.hand
-            straight = self.verify_straight(hand)
-            filtered_hand = list(filter(lambda carta: carta.naipe == self.common_naipe, hand))
-            filtered_hand[::-1]
+            # Filtrar cartas pelo naipe comum
+            filtered_hand = [carta for carta in self.hand if carta.naipe == self.common_naipe]
+            # Ordenar as cartas do mesmo naipe por valor em ordem decrescente
+            filtered_hand = sorted(filtered_hand, key=lambda carta: carta.valor, reverse=True)
 
-            if filtered_hand[0].valor == 14 and filtered_hand[1].valor == 13 and filtered_hand[2].valor == 12 and filtered_hand[3].valor == 11 and filtered_hand[4].valor == 10: #Royal Flush
+            valores = [carta.valor for carta in filtered_hand]
+
+            # Royal Flush (A-10-J-Q-K)
+            if set([1, 10, 11, 12, 13]).issubset(set(valores)):
                 self.victory.append(9)
-            elif straight: # Straight Flush
+            elif self.verify_straight(filtered_hand):  # Straight Flush
                 self.victory.append(8)
-                for i in range(1, 6):  # Deve percorrer as 5 cartas do Straight Flush
-                    self.highest_hand_value[8].append(filtered_hand[i - 1].valor)  # Adiciona o valor das cartas
-                
-            else: #flush
+                for carta in filtered_hand[:5]:  # Adicionar as 5 cartas do Straight Flush
+                    self.highest_hand_value[8].append(carta.valor)
+            else:  # Flush simples
                 self.victory.append(5)
-                for i in range(1, 6):  # Deve percorrer as 5 cartas do Straight Flush
-                    self.highest_hand_value[5].append(filtered_hand[i - 1].valor)  # Adiciona o valor das cartas
+                for carta in filtered_hand[:5]:  # Adicionar as 5 cartas do Flush
+                    self.highest_hand_value[5].append(carta.valor)
+
     def straight(self):
         hand = self.order_cards(1)
-        straight = self.verify_straight(hand) 
-        if straight: # Straight
+        if self.verify_straight(hand):  # Straight
             self.victory.append(4)
-            for i in range(1, 6):  # Deve percorrer as 5 cartas do Straight Flush
-                self.highest_hand_value[4].append(hand[i - 1].valor)  # Adiciona o valor das cartas
+            for carta in hand[:5]:  # Adicionar as 5 cartas do Straight
+                self.highest_hand_value[4].append(carta.valor)
             
     def high_cards(self):
         # Adicionar carta mais alta

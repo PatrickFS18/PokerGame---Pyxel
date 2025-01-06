@@ -3,26 +3,34 @@ from utils.compare import Compare
 class Victory:
     def __init__(self):
         self.winner = None
+        self.jogadas = None
         pass    
     
     def verifyLogic(self, dealer, jogador, adversario):
-        print(jogador)
-        print(adversario)
+        
         self.compare_1 = Compare(jogador.mao, dealer["mao"])
         self.compare_1.game()
         self.compare_1.high_cards()
         
         self.compare_1.countEqualValues()
-                    
+        self.compare_1.determinar_jogada()
+        jogada_player_1 = self.compare_1.jogada 
+        
         self.compare_2 = Compare(adversario.mao, dealer["mao"])
         self.compare_2.game()
         self.compare_2.high_cards()
-        
         self.compare_2.countEqualValues()
+        
+        self.compare_2.determinar_jogada()
+        jogada_player_2 = self.compare_2.jogada
         
         player_1_victory = max(self.compare_1.victory)
         player_2_victory = max(self.compare_2.victory)
         
+        # Na posição 0 o jogador 1,  na posição 1 o jogador 2
+        
+        self.jogadas = [{jogador.id:jogada_player_1},{adversario.id:jogada_player_2}]
+
         if(player_1_victory == player_2_victory) and (player_1_victory != 0 and player_2_victory != 0):
             mao_jogador_1 = self.compare_1.highest_hand_value
             mao_jogador_2 = self.compare_2.highest_hand_value
