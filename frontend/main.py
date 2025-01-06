@@ -395,7 +395,7 @@ class Poker:
 
         # Instruções centralizadas
         instructions = [
-            "Pressione "C" para criar uma sala",
+            "Pressione 'C' para criar uma sala",
             "Setas: navegar | ENTER: ingressar"
         ]
         for i, text in enumerate(instructions):
@@ -487,13 +487,4 @@ class Poker:
                 pyxel.text(52, 150, f"Sua jogada: {jogada_atual}", pyxel.COLOR_DARK_BLUE)
                 pyxel.text(52, 160, f"Jogada do adversario: {jogada_adversario}", pyxel.COLOR_RED)
 
-
-            # Animação de confetes
-            # for _ in range(20):
-            #     pyxel.pset(
-            #         pyxel.rndi(0, pyxel.width - 1),
-            #         pyxel.rndi(0, pyxel.height - 1),
-            #         pyxel.rndi(1, 15),
-            #     )
-       
 Poker()
