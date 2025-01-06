@@ -50,10 +50,10 @@ class Poker:
                             "11" : ( 100,  208, 6, 15),
                             "12" : ( 106,  208, 7, 15),
                             "13" : ( 113,  208, 7, 15),
-                            "Sua" : ( 8, 192, 79, 16),
-                            "Venceu" : ( 88, 192, 159, 32),
-                            "Perdeu" : ( 88, 224, 159,32),
-                            "Empate" : ()
+                            "Sua" : ( 8, 192, 80, 16),
+                            "Venceu" : ( 88, 192, 160, 32),
+                            "Perdeu" : ( 88, 224, 160,32),
+                            "Empate" : (88,152,150,32)
                         }
 
         self.verificar_ganhador = False
@@ -477,7 +477,7 @@ class Poker:
             # Determina a mensagem de resultado e exibe gráficos e textos
             if self.winner == 0:  # Empate
                 print(self.winner)
-                pyxel.blt(48, 80, 1, p_empate[0], p_empate[1], p_empate[2], p_empate[3])
+                pyxel.blt(53, 80, 1, p_empate[0], p_empate[1], p_empate[2], p_empate[3])
                 pyxel.text(52, 100, "Empate!", pyxel.COLOR_WHITE)
                 pyxel.text(52, 120, f"Sua mao: {jogador_mao_formatada}", pyxel.COLOR_WHITE)
                 pyxel.text(52, 130, f"Mao do adversario: {adversario_mao_formatada}", pyxel.COLOR_RED)
