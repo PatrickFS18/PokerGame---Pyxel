@@ -110,7 +110,7 @@ class Poker:
         pyxel.sounds[4].set(
             "f0ra4r f0ra4r f0ra4r f0f0a4r", "n", "6622 6622 6622 6422", "f", 25
         )
-        self.play_music(True, True, True)
+        self.play_music(False, False, False)
 
 
     def play_music(self, ch0, ch1, ch2):
