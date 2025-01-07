@@ -1,6 +1,6 @@
 # PokerGame---Pyxel
 
-## requisitos para executar
+## requisitos para executar 
 Crie uma Virtual Environment na pasta "PokerGame---Pyxel" com o comando   python3 -m venv nome_da_venv
 
 Ative a Virtual Environment com o comando   source nome_da_venv/bin/activate  no linux e 
