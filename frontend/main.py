@@ -133,7 +133,7 @@ class Poker:
         self.mx = pyxel.mouse_x
         self.my = pyxel.mouse_y
         if pyxel.btnp(pyxel.KEY_M):
-            self.play_music(False, False, False)
+            self.play_music(True, True, True)
 
         if self.state == "menu":
             self.update_menu()
