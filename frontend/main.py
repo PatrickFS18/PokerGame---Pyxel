@@ -295,7 +295,7 @@ class Poker:
 
             for i in range(len(dealer_mao)): # Lógica para contar a partir da terceira carta
                 if(i <= rodada // 2 + 2):
-                    p_valor = self.position_itens[f"{dealer_mao[i]["valor"]}"]
+                    p_valor = self.position_itens[f'{dealer_mao[i]["valor"]}']
                     p_naipe = self.position_itens[dealer_mao[i]["naipe"]]
                     p_carta = self.position_cards[i]
                     #(local x,local y, width, height, topox, topoy, centrox, centroy)
@@ -310,7 +310,7 @@ class Poker:
                     pyxel.blt(p_carta[6], p_carta[7], 0, p_naipe[0], p_naipe[1], p_naipe[2], p_naipe[3])
 
             for i in range(len(jogador_mao)):
-                p_valor = self.position_itens[f"{jogador_mao[i]["valor"]}"]
+                p_valor = self.position_itens[f'{jogador_mao[i]["valor"]}']
                 p_naipe = self.position_itens[jogador_mao[i]["naipe"]]
                 p_carta = self.position_cards[i+5]
 
@@ -379,7 +379,7 @@ class Poker:
         y_offset = 40
         for index, sala in enumerate(self.cliente_socket.salas_disponiveis):
             sala_id = sala.get("sala_id", "N/A")
-            jogadores_str = ", ".join([f"Player {j["id"]}" for j in sala.get("jogadores", [])])
+            jogadores_str = ", ".join([f'Player {j["id"]}' for j in sala.get("jogadores", [])])
 
             # Destaque para a sala selecionada
             is_selected = index == self.sala_selecionada_index
@@ -388,8 +388,8 @@ class Poker:
 
             # Fundo do item e texto centralizado
             pyxel.rect(30, y_offset - 2, 196, 14, bg_color)
-            text_x = 256 // 2 - len(f"Sala {sala_id}: {jogadores_str}") * 2
-            pyxel.text(text_x, y_offset, f"Sala {sala_id}: {jogadores_str}", color)
+            text_x = 256 // 2 - len(f'Sala {sala_id}: {jogadores_str}') * 2
+            pyxel.text(text_x, y_offset, f'Sala {sala_id}: {jogadores_str}', color)
 
             y_offset += 18
 
@@ -415,14 +415,14 @@ class Poker:
 
             # Se tiver sala atual
             if self.sala_atual:
-                pyxel.text(10, 10, f"Sala {self.cliente_socket.sala_selecionada} - Jogadores:", pyxel.COLOR_WHITE)
+                pyxel.text(10, 10, f'Sala {self.cliente_socket.sala_selecionada} - Jogadores:', pyxel.COLOR_WHITE)
                 y_offset = 20
 
                 # Exibe o jogador atual
-                pyxel.text(10, 70, f"Player {self.cliente_socket.id_player}", pyxel.COLOR_RED)
+                pyxel.text(10, 70, f'Player {self.cliente_socket.id_player}', pyxel.COLOR_RED)
 
                 # Adiciona os jogadores na sala em uma string
-                jogadores_str = ", ".join([f"Player {jogador["id"]}" for jogador in self.sala_atual.get("jogadores", []) if isinstance(jogador, dict)])
+                jogadores_str = ", ".join([f'Player {jogador["id"]}' for jogador in self.sala_atual.get("jogadores", []) if isinstance(jogador, dict)])
                 if jogadores_str:
                     pyxel.text(10, y_offset, jogadores_str, pyxel.COLOR_WHITE)
 
@@ -454,7 +454,7 @@ class Poker:
             dealer_mao = self.sala_atual["dealer"]
             # Converter a mão em texto organizado
             def formatar_mao(mao):
-                return ", ".join([f"{carta["valor"]} de {carta["naipe"]}" for carta in mao])
+                return ", ".join([f'{carta["valor"]} de {carta["naipe"]}' for carta in mao])
 
             jogador_mao_formatada = formatar_mao(jogador_mao)
             adversario_mao_formatada = formatar_mao(adversario_mao)
