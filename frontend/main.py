@@ -133,7 +133,7 @@ class Poker:
         self.mx = pyxel.mouse_x
         self.my = pyxel.mouse_y
         if pyxel.btnp(pyxel.KEY_M):
-            self.play_music(False, False, False)
+            self.play_music(True, True, True)
 
         if self.state == "menu":
             self.update_menu()
@@ -468,10 +468,10 @@ class Poker:
                 #print(self.winner)
                 pyxel.blt(53, 80, 1, p_empate[0], p_empate[1], p_empate[2], p_empate[3])
                 pyxel.text(52, 100, "Empate!", pyxel.COLOR_WHITE)
-                pyxel.text(52, 120, f"Sua mao: {jogador_mao_formatada}", pyxel.COLOR_WHITE)
-                pyxel.text(52, 130, f"Mao do adversario: {adversario_mao_formatada}", pyxel.COLOR_RED)
-                pyxel.text(52, 150, f"Sua jogada: {jogada_atual}", pyxel.COLOR_DARK_BLUE)
-                pyxel.text(52, 160, f"Jogada do adversario: {jogada_adversario}", pyxel.COLOR_RED)
+                pyxel.text(52, 120, f'Sua mao: {jogador_mao_formatada}', pyxel.COLOR_WHITE)
+                pyxel.text(52, 130, f'Mao do adversario: {adversario_mao_formatada}', pyxel.COLOR_RED)
+                pyxel.text(52, 150, f'Sua jogada: {jogada_atual}', pyxel.COLOR_DARK_BLUE)
+                pyxel.text(52, 160, f'Jogada do adversario: {jogada_adversario}', pyxel.COLOR_RED)
 
             elif id_player == self.winner:  # Vitória
                 pyxel.blt(48, 80, 1, p_venceu[0], p_venceu[1], p_venceu[2], p_venceu[3])
