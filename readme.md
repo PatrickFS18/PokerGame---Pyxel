@@ -1,4 +1,6 @@
-# PokerGame---Pyxel
+# PokerGame---Pyxel 
+
+### Criado por: Patrick Ferreira de Souza e Guilherme Machado Soares
 
 ## requisitos para executar
 Crie uma Virtual Environment na pasta "PokerGame---Pyxel" com o comando   python3 -m venv nome_da_venv
