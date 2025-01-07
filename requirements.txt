@@ -1,6 +1,5 @@
-pyxel
-python-socketio
-eventlet
-requests
-websocket-client
-
+eventlet==0.38.2
+python-socketio==5.12.0
+pyxel==2.2.10
+requests==2.32.3
+websocket-client==1.8.0
